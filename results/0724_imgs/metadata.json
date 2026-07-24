@@ -73,6 +73,30 @@
   },
   "configurations": [
     {
+      "key": "bm_d64_b5",
+      "algorithm": "BM",
+      "disparities": 64,
+      "block_size": 5,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "bm_d64_b11",
+      "algorithm": "BM",
+      "disparities": 64,
+      "block_size": 11,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "bm_d64_b21",
+      "algorithm": "BM",
+      "disparities": 64,
+      "block_size": 21,
+      "p1": null,
+      "p2": null
+    },
+    {
       "key": "bm_d128_b5",
       "algorithm": "BM",
       "disparities": 128,
@@ -92,6 +116,30 @@
       "key": "bm_d128_b21",
       "algorithm": "BM",
       "disparities": 128,
+      "block_size": 21,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "bm_d256_b5",
+      "algorithm": "BM",
+      "disparities": 256,
+      "block_size": 5,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "bm_d256_b11",
+      "algorithm": "BM",
+      "disparities": 256,
+      "block_size": 11,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "bm_d256_b21",
+      "algorithm": "BM",
+      "disparities": 256,
       "block_size": 21,
       "p1": null,
       "p2": null

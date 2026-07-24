@@ -72,9 +72,15 @@ class Configuration:
 
 
 CONFIGURATIONS = (
+    Configuration("bm_d64_b5", "BM", 64, block_size=5),
+    Configuration("bm_d64_b11", "BM", 64, block_size=11),
+    Configuration("bm_d64_b21", "BM", 64, block_size=21),
     Configuration("bm_d128_b5", "BM", 128, block_size=5),
     Configuration("bm_d128_b11", "BM", 128, block_size=11),
     Configuration("bm_d128_b21", "BM", 128, block_size=21),
+    Configuration("bm_d256_b5", "BM", 256, block_size=5),
+    Configuration("bm_d256_b11", "BM", 256, block_size=11),
+    Configuration("bm_d256_b21", "BM", 256, block_size=21),
     Configuration("sgm_d64_p20_p40", "Vitis-SGM", 64, p1=20, p2=40),
     Configuration("sgm_d128_p20_p40", "Vitis-SGM", 128, p1=20, p2=40),
     Configuration("sgm_d256_p20_p40", "Vitis-SGM", 256, p1=20, p2=40),
@@ -102,12 +108,30 @@ COMPARISON_GROUPS = (
         ),
     ),
     (
+        "comparison_bm_d64_block_size.png",
+        "BM block-size comparison (D=64)",
+        (
+            "bm_d64_b5",
+            "bm_d64_b11",
+            "bm_d64_b21",
+        ),
+    ),
+    (
         "comparison_bm_block_size.png",
         "BM block-size comparison (D=128)",
         (
             "bm_d128_b5",
             "bm_d128_b11",
             "bm_d128_b21",
+        ),
+    ),
+    (
+        "comparison_bm_d256_block_size.png",
+        "BM block-size comparison (D=256)",
+        (
+            "bm_d256_b5",
+            "bm_d256_b11",
+            "bm_d256_b21",
         ),
     ),
 )
