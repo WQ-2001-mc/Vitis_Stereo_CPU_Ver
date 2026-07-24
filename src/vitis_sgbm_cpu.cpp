@@ -44,8 +44,8 @@ namespace {
 
 constexpr int kDefaultNumDisparities = 64;
 constexpr int kWindowSize = 5;
-constexpr int kSmallPenalty = 20;
-constexpr int kLargePenalty = 40;
+constexpr int kDefaultSmallPenalty = 20;
+constexpr int kDefaultLargePenalty = 40;
 
 // The Vitis example's NUM_DIR is 4. These are the exact four predecessor
 // directions used by its scalar CPU reference.
@@ -60,12 +60,13 @@ void printUsage(const char* program) {
     std::cerr
         << "Usage: " << program
         << " <left_gray_image> <right_gray_image> [output_raw.png]"
-           " [num_disparities]\n\n"
+           " [num_disparities] [p1] [p2]\n\n"
         << "Defaults (matching the Vitis sgbm example):\n"
         << "  output_raw       sgbm_disparity_raw.png\n"
         << "  num_disparities  " << kDefaultNumDisparities << "\n"
         << "  Census window    " << kWindowSize << "x" << kWindowSize << "\n"
-        << "  P1/P2            " << kSmallPenalty << "/" << kLargePenalty << "\n"
+        << "  P1/P2            " << kDefaultSmallPenalty << "/"
+        << kDefaultLargePenalty << "\n"
         << "  paths            4\n";
 }
 
@@ -85,7 +86,9 @@ bool parseInteger(const char* text, int& value) {
 
 bool validateInputs(const cv::Mat& left,
                     const cv::Mat& right,
-                    int num_disparities) {
+                    int num_disparities,
+                    int small_penalty,
+                    int large_penalty) {
     if (left.empty() || right.empty()) {
         std::cerr << "ERROR: failed to read one or both input images.\n";
         return false;
@@ -102,6 +105,10 @@ bool validateInputs(const cv::Mat& left,
     }
     if (num_disparities >= left.cols) {
         std::cerr << "ERROR: num_disparities must be smaller than the image width.\n";
+        return false;
+    }
+    if (small_penalty < 0 || large_penalty <= small_penalty) {
+        std::cerr << "ERROR: penalties must satisfy 0 <= P1 < P2.\n";
         return false;
     }
     return true;
@@ -187,6 +194,8 @@ void aggregateDirection(const std::vector<int>& initial_cost,
                         int disparities,
                         int delta_row,
                         int delta_col,
+                        int small_penalty,
+                        int large_penalty,
                         std::vector<int>& path_cost,
                         std::vector<int>& aggregated_cost) {
     for (int row = 0; row < rows; ++row) {
@@ -217,13 +226,13 @@ void aggregateDirection(const std::vector<int>& initial_cost,
                 const int same = path_cost[previous_base + disparity];
                 const int lower =
                     disparity > 0
-                        ? path_cost[previous_base + disparity - 1] + kSmallPenalty
+                        ? path_cost[previous_base + disparity - 1] + small_penalty
                         : std::numeric_limits<int>::max();
                 const int higher =
                     disparity + 1 < disparities
-                        ? path_cost[previous_base + disparity + 1] + kSmallPenalty
+                        ? path_cost[previous_base + disparity + 1] + small_penalty
                         : std::numeric_limits<int>::max();
-                const int any = previous_min + kLargePenalty;
+                const int any = previous_min + large_penalty;
                 const int transition = std::min({same, lower, higher, any});
                 const int value =
                     initial_cost[base + disparity] + transition - previous_min;
@@ -237,7 +246,9 @@ void aggregateDirection(const std::vector<int>& initial_cost,
 
 cv::Mat computeVitisSgm(const cv::Mat& left,
                         const cv::Mat& right,
-                        int disparities) {
+                        int disparities,
+                        int small_penalty,
+                        int large_penalty) {
     std::vector<std::uint32_t> left_census;
     std::vector<std::uint32_t> right_census;
     computeCensusTransform(left, left_census);
@@ -259,6 +270,8 @@ cv::Mat computeVitisSgm(const cv::Mat& left,
                            disparities,
                            delta_row,
                            delta_col,
+                           small_penalty,
+                           large_penalty,
                            path_cost,
                            aggregated_cost);
     }
@@ -295,7 +308,7 @@ double estimatedWorkingSetMiB(int rows, int cols, int disparities) {
 }  // namespace
 
 int main(int argc, char** argv) {
-    if (argc < 3 || argc > 5) {
+    if (argc < 3 || argc > 7) {
         printUsage(argv[0]);
         return EXIT_FAILURE;
     }
@@ -306,14 +319,25 @@ int main(int argc, char** argv) {
         argc >= 4 ? argv[3] : "sgbm_disparity_raw.png";
 
     int disparities = kDefaultNumDisparities;
+    int small_penalty = kDefaultSmallPenalty;
+    int large_penalty = kDefaultLargePenalty;
     if (argc >= 5 && !parseInteger(argv[4], disparities)) {
         std::cerr << "ERROR: invalid num_disparities: " << argv[4] << "\n";
+        return EXIT_FAILURE;
+    }
+    if (argc >= 6 && !parseInteger(argv[5], small_penalty)) {
+        std::cerr << "ERROR: invalid P1: " << argv[5] << "\n";
+        return EXIT_FAILURE;
+    }
+    if (argc >= 7 && !parseInteger(argv[6], large_penalty)) {
+        std::cerr << "ERROR: invalid P2: " << argv[6] << "\n";
         return EXIT_FAILURE;
     }
 
     const cv::Mat left = cv::imread(left_path, cv::IMREAD_GRAYSCALE);
     const cv::Mat right = cv::imread(right_path, cv::IMREAD_GRAYSCALE);
-    if (!validateInputs(left, right, disparities)) {
+    if (!validateInputs(
+            left, right, disparities, small_penalty, large_penalty)) {
         return EXIT_FAILURE;
     }
 
@@ -321,7 +345,8 @@ int main(int argc, char** argv) {
               << "Input size:      " << left.cols << "x" << left.rows << "\n"
               << "Disparities:     " << disparities << "\n"
               << "Census window:   " << kWindowSize << "x" << kWindowSize << "\n"
-              << "P1/P2:           " << kSmallPenalty << "/" << kLargePenalty << "\n"
+              << "P1/P2:           " << small_penalty << "/"
+              << large_penalty << "\n"
               << "Paths:           4\n"
               << "Est. memory:     " << std::fixed << std::setprecision(1)
               << estimatedWorkingSetMiB(left.rows, left.cols, disparities)
@@ -330,7 +355,8 @@ int main(int argc, char** argv) {
     cv::Mat disparity_raw;
     const auto start = std::chrono::steady_clock::now();
     try {
-        disparity_raw = computeVitisSgm(left, right, disparities);
+        disparity_raw = computeVitisSgm(
+            left, right, disparities, small_penalty, large_penalty);
     } catch (const std::bad_alloc&) {
         std::cerr << "ERROR: not enough memory for the SGM cost volumes.\n";
         return EXIT_FAILURE;

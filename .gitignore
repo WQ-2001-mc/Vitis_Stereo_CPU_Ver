@@ -2,5 +2,6 @@
 /output/
 /results/camera_dataset/50cm/
 /results/camera_dataset/75cm/
+/results/0724_imgs/details/
 __pycache__/
 *.py[cod]
