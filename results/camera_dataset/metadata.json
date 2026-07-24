@@ -1,0 +1,120 @@
+{
+  "dataset": "/home/hcc/Desktop/Public/datasets/自研相机",
+  "depth_equation": "Z_mm = rectified_fx_px * baseline_mm / disparity_px",
+  "depth_display_mm": [
+    300.0,
+    1200.0
+  ],
+  "bm_parameters": {
+    "block_size": 11,
+    "pre_filter_cap": 31,
+    "uniqueness_ratio": 15,
+    "texture_threshold": 20
+  },
+  "vitis_sgm_parameters": {
+    "census_window": 5,
+    "p1": 20,
+    "p2": 40,
+    "paths": 4
+  },
+  "distances": {
+    "50cm": {
+      "nominal_depth_mm": 500.0,
+      "calibration_file": "/home/hcc/Desktop/Public/datasets/自研相机/50cm/stereo_opencv_params-0723-1708.yaml",
+      "selected_camera1_left_file": "Image_20260723221034165.bmp",
+      "selected_camera2_right_file": "Image_20260723220953229.bmp",
+      "order_candidates": [
+        {
+          "camera1_file": "Image_20260723221034165.bmp",
+          "camera2_file": "Image_20260723220953229.bmp",
+          "score": 0.8333679593479828,
+          "valid_percent": 35.352913829409026,
+          "plausible_percent": 18.132924950547398,
+          "median_disparity_px": 38.125,
+          "expected_disparity_px": 81.33831545971483
+        },
+        {
+          "camera1_file": "Image_20260723220953229.bmp",
+          "camera2_file": "Image_20260723221034165.bmp",
+          "score": 0.5978345903799616,
+          "valid_percent": 18.889299094812262,
+          "plausible_percent": 11.841049762536349,
+          "median_disparity_px": 56.0,
+          "expected_disparity_px": 81.33831545971483
+        }
+      ],
+      "rectified_focal_px": 658.1692152205752,
+      "baseline_yaml_mm": 61.791339961453,
+      "rectified_baseline_mm": 61.7913399614532,
+      "doffs_px": 0.0,
+      "roi1": [
+        0,
+        0,
+        1224,
+        1023
+      ],
+      "roi2": [
+        0,
+        0,
+        1224,
+        1024
+      ],
+      "expected_disparity_px": 81.33831545971483,
+      "target_roi_xyxy": [
+        640,
+        430,
+        710,
+        545
+      ]
+    },
+    "75cm": {
+      "nominal_depth_mm": 750.0,
+      "calibration_file": "/home/hcc/Desktop/Public/datasets/自研相机/75cm/stereo_opencv_params-0723-1708.yaml",
+      "selected_camera1_left_file": "Image_20260724094303759.bmp",
+      "selected_camera2_right_file": "Image_20260724094244564.bmp",
+      "order_candidates": [
+        {
+          "camera1_file": "Image_20260724094303759.bmp",
+          "camera2_file": "Image_20260724094244564.bmp",
+          "score": 1.0499600607783994,
+          "valid_percent": 44.351236542966795,
+          "plausible_percent": 22.355083362959316,
+          "median_disparity_px": 34.5625,
+          "expected_disparity_px": 54.22554363980989
+        },
+        {
+          "camera1_file": "Image_20260724094244564.bmp",
+          "camera2_file": "Image_20260724094303759.bmp",
+          "score": 0.6091030692875308,
+          "valid_percent": 19.17348064283826,
+          "plausible_percent": 10.05574242714287,
+          "median_disparity_px": 62.6875,
+          "expected_disparity_px": 54.22554363980989
+        }
+      ],
+      "rectified_focal_px": 658.1692152205752,
+      "baseline_yaml_mm": 61.791339961453,
+      "rectified_baseline_mm": 61.7913399614532,
+      "doffs_px": 0.0,
+      "roi1": [
+        0,
+        0,
+        1224,
+        1023
+      ],
+      "roi2": [
+        0,
+        0,
+        1224,
+        1024
+      ],
+      "expected_disparity_px": 54.22554363980989,
+      "target_roi_xyxy": [
+        635,
+        450,
+        682,
+        535
+      ]
+    }
+  }
+}

@@ -1,0 +1,6 @@
+/build/
+/output/
+/results/camera_dataset/50cm/
+/results/camera_dataset/75cm/
+__pycache__/
+*.py[cod]
