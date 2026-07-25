@@ -1,0 +1,140 @@
+{
+  "ground_truth_available": false,
+  "comparison_note": "Same scene, algorithm parameters and depth color scale; cameras have different resolution, optics, baseline and field of view.",
+  "depth_equation": "Z_mm = rectified_fx_px * baseline_mm / (disparity_px + doffs_px)",
+  "depth_display_mm": [
+    300.0,
+    3000.0
+  ],
+  "depth_valid_mm": [
+    150.0,
+    10000.0
+  ],
+  "normalized_evaluation_roi_xyxy": [
+    0.23,
+    0.02,
+    0.984,
+    0.98
+  ],
+  "photo_inlier_abs_gray_threshold": 15.0,
+  "parameters": {
+    "disparities": 128,
+    "bm": {
+      "block_size": 11,
+      "pre_filter_cap": 31,
+      "uniqueness_ratio": 15,
+      "texture_threshold": 20,
+      "min_disparity": 0
+    },
+    "vitis_sgm": {
+      "census_window": 5,
+      "p1": 20,
+      "p2": 40,
+      "paths": 4
+    }
+  },
+  "cameras": {
+    "previous_camera": {
+      "label": "Previous in-house camera",
+      "dataset": "/home/hcc/Desktop/Public/datasets/自研相机/0724-imgs",
+      "calibration_file": "/home/hcc/Desktop/Public/datasets/自研相机/0724-imgs/stereo_opencv_params-0723-1708.yaml",
+      "selected_left_file": "Image_20260724151037462.bmp",
+      "selected_right_file": "Image_20260724151045345.bmp",
+      "order_candidates": [
+        {
+          "left_file": "Image_20260724151037462.bmp",
+          "right_file": "Image_20260724151045345.bmp",
+          "score": 136.28834350610975,
+          "valid_percent": 49.45252014884574,
+          "photo_median_abs_gray": 3.0,
+          "photo_inlier_percent": 86.835823357264,
+          "median_disparity_px": 44.75
+        },
+        {
+          "left_file": "Image_20260724151045345.bmp",
+          "right_file": "Image_20260724151037462.bmp",
+          "score": 75.02385185249801,
+          "valid_percent": 21.92708057774721,
+          "photo_median_abs_gray": 14.0,
+          "photo_inlier_percent": 53.0967712747508,
+          "median_disparity_px": 57.9375
+        }
+      ],
+      "image_size": [
+        1224,
+        1024
+      ],
+      "rectified_focal_px": 658.1692152205752,
+      "baseline_yaml_mm": 61.791339961453,
+      "rectified_baseline_mm": 61.7913399614532,
+      "fx_times_baseline_px_mm": 40669.15772985742,
+      "doffs_px": 0.0,
+      "rectification_roi1": [
+        0,
+        0,
+        1224,
+        1023
+      ],
+      "rectification_roi2": [
+        0,
+        0,
+        1224,
+        1024
+      ],
+      "evaluation_roi_xyxy": [
+        282,
+        20,
+        1204,
+        1004
+      ],
+      "d128_theoretical_nearest_depth_mm": 320.22958842407417
+    },
+    "gemini335": {
+      "label": "Gemini335 (0724)",
+      "dataset": "/home/hcc/Desktop/Public/datasets/gemini335/0724",
+      "calibration_file": "/home/hcc/Desktop/Public/datasets/gemini335/0724/stereo_opencv_params-0725.yaml",
+      "selected_left_file": "gemini335_left_IR Left.png",
+      "selected_right_file": "gemini335_right_IR Right.png",
+      "order_candidates": [
+        {
+          "left_file": "gemini335_left_IR Left.png",
+          "right_file": "gemini335_right_IR Right.png",
+          "selection": "explicit filename labels",
+          "score": 159.11972162330335,
+          "valid_percent": 65.79131795604545,
+          "photo_median_abs_gray": 3.0,
+          "photo_inlier_percent": 93.32840366725789,
+          "median_disparity_px": 31.125
+        }
+      ],
+      "image_size": [
+        848,
+        480
+      ],
+      "rectified_focal_px": 406.4524535306849,
+      "baseline_yaml_mm": 50.281467197325,
+      "rectified_baseline_mm": 50.28146719732501,
+      "fx_times_baseline_px_mm": 20437.0257094754,
+      "doffs_px": 0.0,
+      "rectification_roi1": [
+        0,
+        0,
+        848,
+        479
+      ],
+      "rectification_roi2": [
+        0,
+        0,
+        848,
+        479
+      ],
+      "evaluation_roi_xyxy": [
+        195,
+        10,
+        834,
+        470
+      ],
+      "d128_theoretical_nearest_depth_mm": 160.92146227933387
+    }
+  }
+}
