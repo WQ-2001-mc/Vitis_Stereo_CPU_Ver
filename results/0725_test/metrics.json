@@ -1,0 +1,40 @@
+[
+  {
+    "key": "bm_d128_b11",
+    "algorithm": "BM",
+    "disparities": 128,
+    "block_size": 11,
+    "p1": null,
+    "p2": null,
+    "runtime_ms": 14.1581,
+    "estimated_memory_mib": null,
+    "valid_percent": 49.348119698729455,
+    "saturated_percent": 0.26561345158906136,
+    "photo_median_abs_gray": 12.0,
+    "photo_inlier_percent": 56.671889382434294,
+    "local_outlier_percent": 10.83486931695347,
+    "median_disparity_px": 39.125,
+    "p10_depth_mm": 414.19891357421875,
+    "median_depth_mm": 1039.46728515625,
+    "p90_depth_mm": 7394.39208984375
+  },
+  {
+    "key": "sgm_d128_p20_p40",
+    "algorithm": "Vitis-SGM",
+    "disparities": 128,
+    "block_size": null,
+    "p1": 20,
+    "p2": 40,
+    "runtime_ms": 2043.967,
+    "estimated_memory_mib": 1845.6,
+    "valid_percent": 92.87265072326048,
+    "saturated_percent": 0.4557772850455778,
+    "photo_median_abs_gray": 13.0,
+    "photo_inlier_percent": 53.08764786899302,
+    "local_outlier_percent": 23.739212920691653,
+    "median_disparity_px": 43.0,
+    "p10_depth_mm": 402.6649169921875,
+    "median_depth_mm": 945.7943115234375,
+    "p90_depth_mm": 6778.19287109375
+  }
+]

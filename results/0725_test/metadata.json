@@ -1,0 +1,102 @@
+{
+  "input_mode": "dataset_auto_order",
+  "dataset": "/home/hcc/Desktop/Public/datasets/自研相机/0725-test-150cm",
+  "calibration_file": "/home/hcc/Desktop/Public/datasets/自研相机/0725-test-150cm/stereo_opencv_params-0723-1708.yaml",
+  "ground_truth_available": false,
+  "selected_left_file": "Image_20260725162933509.bmp",
+  "selected_right_file": "Image_20260725162928943.bmp",
+  "filename_timestamp_gap_seconds": 4.566,
+  "filename_timestamp_capture_semantics_known": false,
+  "order_candidates": [
+    {
+      "left_file": "Image_20260725162933509.bmp",
+      "right_file": "Image_20260725162928943.bmp",
+      "score": 108.54188910136156,
+      "valid_percent": 50.524430926216645,
+      "photo_median_abs_gray": 11.0,
+      "photo_inlier_percent": 58.017458175144924,
+      "median_disparity_px": 37.0625
+    },
+    {
+      "left_file": "Image_20260725162928943.bmp",
+      "right_file": "Image_20260725162933509.bmp",
+      "score": 57.48974737896647,
+      "valid_percent": 23.52482339089482,
+      "photo_median_abs_gray": 24.0,
+      "photo_inlier_percent": 33.964923988071654,
+      "median_disparity_px": 60.8125
+    }
+  ],
+  "image_size": [
+    1224,
+    1024
+  ],
+  "rectified_focal_px": 658.1692152205752,
+  "baseline_yaml_mm": 61.791339961453,
+  "rectified_baseline_mm": 61.7913399614532,
+  "fx_times_baseline_px_mm": 40669.15772985742,
+  "doffs_px": 0.0,
+  "rectification_roi1": [
+    0,
+    0,
+    1224,
+    1023
+  ],
+  "rectification_roi2": [
+    0,
+    0,
+    1224,
+    1024
+  ],
+  "depth_equation": "Z_mm = rectified_fx_px * baseline_mm / (disparity_px + doffs_px)",
+  "depth_display_mm": [
+    300.0,
+    3000.0
+  ],
+  "depth_valid_mm": [
+    150.0,
+    10000.0
+  ],
+  "evaluation_roi_xyxy": [
+    280,
+    20,
+    1204,
+    1004
+  ],
+  "photo_inlier_abs_gray_threshold": 15.0,
+  "bm_cpp_visual_match_percent": 100.0,
+  "parameters": {
+    "disparities": 128,
+    "bm": {
+      "block_size": 11,
+      "pre_filter_cap": 31,
+      "uniqueness_ratio": 15,
+      "texture_threshold": 20,
+      "min_disparity": 0
+    },
+    "vitis_sgm": {
+      "census_window": 5,
+      "p1": 20,
+      "p2": 40,
+      "paths": 4
+    }
+  },
+  "configurations": [
+    {
+      "key": "bm_d128_b11",
+      "algorithm": "BM",
+      "disparities": 128,
+      "block_size": 11,
+      "p1": null,
+      "p2": null
+    },
+    {
+      "key": "sgm_d128_p20_p40",
+      "algorithm": "Vitis-SGM",
+      "disparities": 128,
+      "block_size": null,
+      "p1": 20,
+      "p2": 40
+    }
+  ]
+}
