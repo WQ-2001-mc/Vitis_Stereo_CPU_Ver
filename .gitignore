@@ -5,6 +5,7 @@
 /results/0724_imgs/details/
 /results/gemini335_0724/details/
 /results/gemini335_1280x800_bm_sweep/details/
+/results/gemini335_1280x800_sgbm_sweep/details/
 /results/0725_test/details/
 __pycache__/
 *.py[cod]

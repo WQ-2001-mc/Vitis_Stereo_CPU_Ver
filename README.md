@@ -10,9 +10,13 @@
    - [3.3 手动编译](#33-手动编译)
    - [3.4 分别运行](#34-分别运行)
    - [3.5 交互式扫描 D/W 并生成深度报告](#35-交互式扫描-dw-并生成深度报告)
+   - [3.6 交互式扫描 Vitis-SGBM 的 D/P1/P2](#36-交互式扫描-vitis-sgbm-的-dp1p2)
 4. [输出](#4-输出)
 5. [参数建议](#5-参数建议)
 6. [最新参数扫描结果](#6-最新参数扫描结果)
+   - [6.1 StereoBM D/W 扫描](#61-stereobm-dw-扫描)
+   - [6.2 Vitis-SGBM D/P1/P2 扫描](#62-vitis-sgbm-dp1p2-扫描)
+     - [完整报告：Gemini335 Vitis-SGBM/SGM 参数效果对比](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)
 7. [仓库结构](#7-仓库结构)
 8. [详细文档](#8-详细文档)
    - [8.1 原理与使用说明](#81-原理与使用说明)
@@ -135,6 +139,23 @@ python3 scripts/run_stereobm_depth_sweep.py \
 Gemini335 1280×800 样本的结果见
 [StereoBM D/W 深度图横向对比](results/gemini335_1280x800_bm_sweep/STEREOBM_DEPTH_COMPARISON.md)。
 
+### 3.6 交互式扫描 Vitis-SGBM 的 D/P1/P2
+
+需要比较 Vitis 标量 SGM 参考实现的视差范围和平滑惩罚时，运行：
+
+```bash
+cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
+./scripts/run_vitis_sgbm_parameter_sweep.py
+```
+
+默认执行两组受控实验：固定 `P1/P2=20/40` 比较 `D=64/128/256`，以及
+固定 `D=128` 比较 `P1/P2=10/20、20/40、40/80、10/40、20/80`。脚本
+同时保留原始核输出并执行外部左右一致性审计。需要注意，1280×800、D=256
+的标量 CPU 程序估算工作集约为 3.0 GiB，应确保主机有足够可用内存。
+
+当前 Gemini335 样本的完整结果见
+[Vitis-SGBM/SGM D 与 P1/P2 参数效果对比](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)。
+
 ## 4. 输出
 
 - BM 输出按 Vitis 测试台的方式缩放为 8 位视差可视化图。
@@ -163,6 +184,8 @@ Gemini335 1280×800 样本的结果见
 
 ## 6. 最新参数扫描结果
 
+### 6.1 StereoBM D/W 扫描
+
 Gemini335 1280×800 双目 IR 图已经完成 StereoBM 参数扫描，当前比较范围为
 `D=64/128/256`、`W=5/9/11/21`，共 12 组配置。所有深度图使用统一的
 300–3000 mm 色标和共同评价 ROI。
@@ -175,6 +198,23 @@ Gemini335 1280×800 双目 IR 图已经完成 StereoBM 参数扫描，当前比�
 当前数据上可优先把 `D=128/W=11` 作为效果折中基线，同时保留
 `D=128/W=9` 作为更小窗口的硬件候选。CPU 参考时间不能直接视为 FPGA
 延时，资源和时序仍需通过对应 HLS 顶层的 C 综合报告评估。
+
+### 6.2 Vitis-SGBM D/P1/P2 扫描
+
+同一组 Gemini335 图像还完成了 Vitis 标量 SGM 参考实现的 7 个唯一配置
+测试：固定 `P1/P2=20/40` 比较 `D=64/128/256`，并在 `D=128` 下比较
+五组平滑惩罚。报告同时展示原始核输出和容差 1 px 的外部左右一致性结果，
+避免把该实现强制产生的视差误称为可靠深度。
+
+- [完整 Markdown 报告：Vitis-SGBM/SGM D 与 P1/P2 参数效果对比](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)
+- [D 范围原始深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_D_range_raw.png)
+- [D 范围左右一致深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_D_range_lr.png)
+- [P1/P2 左右一致深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_penalties_lr.png)
+- [完整量化指标 CSV](results/gemini335_1280x800_sgbm_sweep/metrics.csv)
+
+本帧中 `D=128/P1=20/P2=40` 是默认可复现基线；`20/80` 的左右一致覆盖
+更高，但没有真值时不能据此宣称其绝对深度更准确。D=256 没有提高一致覆盖，
+却使标量 CPU 时间和估算软件工作集约翻倍。
 
 ## 7. 仓库结构
 
@@ -209,6 +249,7 @@ CSV、JSON 和元数据保留在各结果目录的顶层。
 - [0724 多距离室内场景参数验证](docs/experiment-0724-parameter-validation.md)
 - [Gemini335 与之前相机同场景对比](docs/experiment-gemini335-comparison.md)
 - [Gemini335 1280×800 StereoBM D/W 深度图横向对比](results/gemini335_1280x800_bm_sweep/STEREOBM_DEPTH_COMPARISON.md)
+- [Gemini335 1280×800 Vitis-SGBM D/P1/P2 参数效果](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)
 - [0725-test BM 与 Vitis-SGM 深度效果](docs/experiment-0725-bm-sgm.md)
 
 ## 9. License
