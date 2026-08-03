@@ -5,10 +5,13 @@ The program under test is ``src/vitis_sgbm_cpu.cpp``: 5x5 Census cost, four
 semi-global aggregation paths, integer-disparity winner-takes-all, and tunable
 D/P1/P2.  It is not OpenCV StereoSGBM.
 
-Two controlled comparisons are generated:
+The default run evaluates the full Cartesian product of:
 
-1. D=64/128/256 at fixed P1/P2=20/40.
-2. D=128 at P1/P2=10/20, 20/40, 40/80, 10/40, and 20/80.
+* D=64/128/256.
+* P1/P2=10/20, 20/40, 40/80, 10/40, and 20/80.
+
+It generates one 3x5 matrix plus two controlled slices: D at fixed
+P1/P2=20/40, and P1/P2 at fixed D=128.
 
 The reference kernel has no confidence or invalid-disparity output.  Therefore
 the script preserves its raw result and separately runs a horizontally flipped
@@ -117,9 +120,9 @@ class Result:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run controlled D and P1/P2 sweeps with the repository Vitis "
-            "scalar SGM reference, then generate depth comparisons and a "
-            "Markdown technical report."
+            "Run a full D x P1/P2 matrix plus controlled slices with the "
+            "repository Vitis scalar SGM reference, then generate depth "
+            "comparisons and a Markdown technical report."
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -130,7 +133,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, help="Output directory")
     parser.add_argument(
         "--disparities",
-        help="Comma/space-separated D values for the range sweep",
+        help="Comma/space-separated D values for the matrix rows and D slice",
     )
     parser.add_argument(
         "--range-p1",
@@ -149,7 +152,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--penalty-pairs",
-        help="Comma-separated P1/P2 pairs, for example 10/20,20/40,40/80",
+        help=(
+            "P1/P2 pairs for the matrix columns and penalty slice, "
+            "for example 10/20,20/40,40/80"
+        ),
     )
     parser.add_argument("--depth-min-mm", type=float)
     parser.add_argument("--depth-max-mm", type=float)
@@ -344,7 +350,12 @@ def validate_inputs(args: argparse.Namespace) -> None:
 
 def build_configurations(
     args: argparse.Namespace,
-) -> tuple[list[Configuration], list[Configuration], list[Configuration]]:
+) -> tuple[
+    list[Configuration],
+    list[Configuration],
+    list[Configuration],
+    list[Configuration],
+]:
     range_configs = [
         Configuration(disparity, args.range_p1, args.range_p2)
         for disparity in args.disparity_values
@@ -353,10 +364,15 @@ def build_configurations(
         Configuration(args.penalty_disparity, p1, p2)
         for p1, p2 in args.penalty_pair_values
     ]
+    matrix_configs = [
+        Configuration(disparity, p1, p2)
+        for disparity in args.disparity_values
+        for p1, p2 in args.penalty_pair_values
+    ]
     unique: dict[str, Configuration] = {}
-    for config in (*range_configs, *penalty_configs):
+    for config in (*matrix_configs, *range_configs, *penalty_configs):
         unique.setdefault(config.key, config)
-    return range_configs, penalty_configs, list(unique.values())
+    return range_configs, penalty_configs, matrix_configs, list(unique.values())
 
 
 def ensure_cpp_binary(project_root: Path) -> tuple[Path, str]:
@@ -739,6 +755,174 @@ def make_depth_grid(
     write_image(output_path, canvas)
 
 
+def make_parameter_matrix(
+    disparities: Sequence[int],
+    penalty_pairs: Sequence[tuple[int, int]],
+    results_by_key: dict[str, Result],
+    raw_colors: dict[str, np.ndarray],
+    lr_colors: dict[str, np.ndarray],
+    lr_tolerance_px: int,
+    depth_min_mm: float,
+    depth_max_mm: float,
+    output_path: Path,
+) -> None:
+    """Render the complete D x P1/P2 experiment as one auditable image.
+
+    Every cell contains the raw kernel output and the separately filtered
+    left-right-consistent view.  The same physical-depth palette and panel
+    geometry are used throughout the matrix.
+    """
+
+    row_label_width = 125
+    cell_width = 400
+    image_height = 225
+    view_header_height = 30
+    footer_height = 62
+    cell_height = 2 * (view_header_height + image_height) + footer_height
+    title_height = 70
+    column_header_height = 58
+    colorbar_height = 82
+    canvas_width = row_label_width + cell_width * len(penalty_pairs)
+    canvas_height = (
+        title_height
+        + column_header_height
+        + cell_height * len(disparities)
+        + colorbar_height
+    )
+    canvas = np.full((canvas_height, canvas_width, 3), 18, dtype=np.uint8)
+
+    put_centered(
+        canvas,
+        "Vitis-SGM full parameter matrix: raw kernel + LR audit",
+        43,
+        0.88,
+        (245, 245, 245),
+        2,
+    )
+    cv2.putText(
+        canvas,
+        "rows",
+        (16, title_height + 37),
+        FONT,
+        0.45,
+        (175, 175, 175),
+        1,
+        cv2.LINE_AA,
+    )
+    for column, (p1, p2) in enumerate(penalty_pairs):
+        x0 = row_label_width + column * cell_width
+        header = canvas[
+            title_height : title_height + column_header_height,
+            x0 : x0 + cell_width,
+        ]
+        put_centered(
+            header,
+            f"P1/P2 = {p1}/{p2}",
+            38,
+            0.70,
+            (250, 250, 250),
+            2,
+        )
+
+    matrix_y0 = title_height + column_header_height
+    for row, disparity in enumerate(disparities):
+        y0 = matrix_y0 + row * cell_height
+        row_header = canvas[
+            y0 : y0 + cell_height,
+            :row_label_width,
+        ]
+        put_centered(
+            row_header,
+            f"D={disparity}",
+            cell_height // 2,
+            0.78,
+            (250, 250, 250),
+            2,
+        )
+        for column, (p1, p2) in enumerate(penalty_pairs):
+            config = Configuration(disparity, p1, p2)
+            result = results_by_key[config.key]
+            x0 = row_label_width + column * cell_width
+            cell = canvas[y0 : y0 + cell_height, x0 : x0 + cell_width]
+
+            raw_header_y = 22
+            put_centered(
+                cell,
+                "RAW KERNEL",
+                raw_header_y,
+                0.48,
+                (225, 225, 225),
+                1,
+            )
+            raw_image_y0 = view_header_height
+            cell[
+                raw_image_y0 : raw_image_y0 + image_height,
+                :,
+            ] = fit_panel_image(
+                raw_colors[config.key], cell_width, image_height
+            )
+
+            lr_header_y0 = raw_image_y0 + image_height
+            put_centered(
+                cell[
+                    lr_header_y0 : lr_header_y0 + view_header_height,
+                    :,
+                ],
+                f"LR AUDIT <= {lr_tolerance_px} px",
+                22,
+                0.48,
+                (225, 225, 225),
+                1,
+            )
+            lr_image_y0 = lr_header_y0 + view_header_height
+            cell[
+                lr_image_y0 : lr_image_y0 + image_height,
+                :,
+            ] = fit_panel_image(
+                lr_colors[config.key], cell_width, image_height
+            )
+
+            footer_y0 = lr_image_y0 + image_height
+            put_centered(
+                cell,
+                (
+                    f"LR {result.lr_consistent_coverage_pct:.1f}%  |  "
+                    f"sat {result.disparity_saturation_pct:.2f}%"
+                ),
+                footer_y0 + 24,
+                0.45,
+                (230, 230, 230),
+                1,
+            )
+            put_centered(
+                cell,
+                (
+                    f"CPU {result.cpp_compute_median_ms / 1000.0:.2f} s  |  "
+                    f"RAM {result.estimated_cpu_working_set_mib:.0f} MiB"
+                ),
+                footer_y0 + 49,
+                0.43,
+                (200, 200, 200),
+                1,
+            )
+            cv2.rectangle(
+                cell,
+                (0, 0),
+                (cell_width - 1, cell_height - 1),
+                (82, 82, 82),
+                1,
+            )
+
+    colorbar_y = matrix_y0 + cell_height * len(disparities) + 11
+    add_horizontal_colorbar(
+        canvas,
+        colorbar_y,
+        depth_min_mm,
+        depth_max_mm,
+    )
+    write_image(output_path, canvas)
+
+
 def metric_limits(values: Iterable[float], percentage: bool) -> tuple[float, float]:
     finite = [float(value) for value in values if np.isfinite(value)]
     if not finite:
@@ -858,7 +1042,11 @@ def format_number(value: float, digits: int = 1) -> str:
 def write_metrics_csv(results: Sequence[Result], path: Path) -> None:
     fieldnames = list(asdict(results[0]).keys())
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=fieldnames,
+            lineterminator="\n",
+        )
         writer.writeheader()
         for result in results:
             writer.writerow(asdict(result))
@@ -870,6 +1058,7 @@ def write_report(
     calibration: Calibration,
     range_configs: Sequence[Configuration],
     penalty_configs: Sequence[Configuration],
+    matrix_configs: Sequence[Configuration],
     unique_configs: Sequence[Configuration],
     results_by_key: dict[str, Result],
     common_roi_bounds: tuple[int, int, int, int],
@@ -881,6 +1070,10 @@ def write_report(
     best_range = max(range_results, key=lambda item: item.lr_consistent_coverage_pct)
     best_penalty = max(
         penalty_results, key=lambda item: item.lr_consistent_coverage_pct
+    )
+    best_matrix = max(
+        (results_by_key[config.key] for config in matrix_configs),
+        key=lambda item: item.lr_consistent_coverage_pct,
     )
     default = results_by_key.get(
         Configuration(
@@ -907,6 +1100,54 @@ def write_report(
         - calibration.fx_baseline_mm_px / (far_disparity_floor + 1)
     )
     x0, y0, x1, y1 = common_roi_bounds
+    matrix_coverage_lines = [
+        "| D \\ P1/P2 | "
+        + " | ".join(
+            f"{p1}/{p2}" for p1, p2 in args.penalty_pair_values
+        )
+        + " |",
+        "|---:|" + "|".join("---:" for _ in args.penalty_pair_values) + "|",
+    ]
+    for disparity in args.disparity_values:
+        matrix_coverage_lines.append(
+            f"| {disparity} | "
+            + " | ".join(
+                f"{results_by_key[Configuration(disparity, p1, p2).key].lr_consistent_coverage_pct:.1f}%"
+                for p1, p2 in args.penalty_pair_values
+            )
+            + " |"
+        )
+    matrix_row_bests = {
+        disparity: max(
+            (
+                results_by_key[Configuration(disparity, p1, p2).key]
+                for p1, p2 in args.penalty_pair_values
+            ),
+            key=lambda item: item.lr_consistent_coverage_pct,
+        )
+        for disparity in args.disparity_values
+    }
+    matrix_column_best_disparities = [
+        max(
+            (
+                results_by_key[Configuration(disparity, p1, p2).key]
+                for disparity in args.disparity_values
+            ),
+            key=lambda item: item.lr_consistent_coverage_pct,
+        ).disparities
+        for p1, p2 in args.penalty_pair_values
+    ]
+    if len(set(matrix_column_best_disparities)) == 1:
+        column_winner_text = (
+            f"按列比较时，{len(args.penalty_pair_values)} 组 P1/P2 的 "
+            "LR 覆盖最高值都出现在 "
+            f"D={matrix_column_best_disparities[0]}"
+        )
+    else:
+        column_winner_text = (
+            "按列比较时，各 P1/P2 的 LR 覆盖最佳 D 依次为 "
+            + list_text(matrix_column_best_disparities)
+        )
 
     lines = [
         "# Gemini335 Vitis-SGBM/SGM：D 与 P1/P2 参数效果对比",
@@ -920,11 +1161,11 @@ def write_report(
         ),
         "",
         (
-            f"实验包含 {len(unique_configs)} 个唯一配置：第一组固定 "
-            f"P1/P2={args.range_p1}/{args.range_p2} 比较 "
-            f"D={list_text(args.disparity_values)}；第二组固定 "
-            f"D={args.penalty_disparity} 比较 "
-            f"P1/P2={pairs_text(args.penalty_pair_values)}。"
+            f"实验包含 {len(unique_configs)} 个唯一配置，完整覆盖 "
+            f"D={list_text(args.disparity_values)} 与 "
+            f"P1/P2={pairs_text(args.penalty_pair_values)} 的 "
+            f"{len(args.disparity_values)}×{len(args.penalty_pair_values)} "
+            "笛卡尔组合，并保留固定 P1/P2 的 D 切片和固定 D 的惩罚切片。"
             f"所有深度图沿用 BM 报告的 {args.depth_min_mm:g}–"
             f"{args.depth_max_mm:g} mm 固定色标和共同 ROI。"
         ),
@@ -935,6 +1176,9 @@ def write_report(
             f"在 D={args.penalty_disparity} 的惩罚扫描中最高的是 "
             f"P1/P2={best_penalty.p1}/{best_penalty.p2}"
             f"（{best_penalty.lr_consistent_coverage_pct:.1f}%）。"
+            f"全部 {len(matrix_configs)} 组中 LR 覆盖最高的是 "
+            f"D={best_matrix.disparities}, P1/P2={best_matrix.p1}/{best_matrix.p2}"
+            f"（{best_matrix.lr_consistent_coverage_pct:.1f}%）。"
             "由于没有像素级真值，这些是一致性与对应关系诊断，不能解释为绝对深度精度。"
         ),
         "",
@@ -986,6 +1230,101 @@ def write_report(
         )
     lines.extend(
         [
+            "",
+            "## D、P1/P2 是当前 CPU 程序开放的参数，不是 SGBM 的全部配置",
+            "",
+            (
+                "对 `build/vitis_sgbm_cpu` 这个可执行程序而言，除左右输入和输出路径外，"
+                "命令行可调的匹配参数确实只有 `D、P1、P2`。但完整 SGBM 的算法设计"
+                "还涉及匹配代价、窗口、聚合方向、视差选择和置信度/后处理；Vitis HLS "
+                "核另外还有视差并行度、图像尺寸上限和像素并行度等硬件配置。"
+                "本轮把这些都固定后，只研究 D 与 P1/P2。"
+            ),
+            "",
+            "| 配置层 | 本仓库标量 CPU 参考 | Vitis HLS 中的含义 |",
+            "|---|---|---|",
+            (
+                "| 视差范围 D | 命令行运行时可调，1–256 | `TOTAL_DISPARITY`，"
+                "通常为编译期模板参数 |"
+            ),
+            (
+                "| 平滑惩罚 P1/P2 | 命令行运行时可调，要求 `0≤P1<P2` | "
+                "核函数运行时端口，Vitis 实现还要求 `P2≤100` |"
+            ),
+            (
+                "| 匹配代价/窗口 | 固定 5×5 Census | `WINDOW_SIZE=5`；"
+                "当前 Vitis 实现断言只支持 5 |"
+            ),
+            (
+                "| 聚合路径 | 固定 4 路径 | `NUM_DIR` 编译期参数，可取 2/3/4 |"
+            ),
+            (
+                "| 视差并行度 | 标量 CPU 不模拟硬件并行 | `PARALLEL_UNITS` 编译期参数，"
+                "要求整除 D |"
+            ),
+            (
+                "| 图像/接口 | 当前输入为 1280×800 灰度图 | `HEIGHT/WIDTH` 上限、"
+                "`NPC`、输入输出类型和 AXI 位宽均影响 HLS 资源与吞吐 |"
+            ),
+            (
+                "| 输出与后处理 | 整数 WTA；无 uniqueness、亚像素、speckle、LR check | "
+                "若硬件需要这些功能，必须另行实现并计入资源/延时 |"
+            ),
+            "",
+            (
+                "标定参数 `fx、baseline、cx` 和双目校正决定视差如何换算为毫米深度，"
+                "但不属于当前 SGM 代价聚合的 D/P1/P2 参数。"
+            ),
+            "",
+            (
+                "如果讨论的是 OpenCV `StereoSGBM`，它还公开 `minDisparity、"
+                "blockSize、disp12MaxDiff、preFilterCap、uniquenessRatio、"
+                "speckleWindowSize、speckleRange、mode` 等运行时参数。"
+                "这些接口不能直接等同于本报告的 Vitis `SemiGlobalBM`。"
+            ),
+            "",
+            "## 15 组矩阵完整展示 D 与 P1/P2 的耦合",
+            "",
+            "![D 与 P1/P2 完整参数矩阵](comparison_D_P1_P2_matrix.png)",
+            "",
+            (
+                f"图中每一行依次为 D={list_text(args.disparity_values)}，每一列依次为 "
+                f"P1/P2={pairs_text(args.penalty_pair_values)}。每个格子上半部分是原始核输出，"
+                f"下半部分是容差≤{args.lr_tolerance_px} px 的外部 LR 审计结果；"
+                f"所有格子使用同一 {args.depth_min_mm:g}–{args.depth_max_mm:g} mm 色标、"
+                "同一 ROI 和同一显示尺寸，因此可以横向比较 P1/P2，也可以纵向比较 D。"
+            ),
+            "",
+            (
+                "每格底部的 `LR` 是共同 ROI 内左右一致覆盖率，`sat` 是视差落在 "
+                "D−1 上边界的比例，`CPU/RAM` 只描述标量 CPU 参考程序。黑色在原始图中"
+                "表示零视差，在 LR 图中还包括双向不一致、视差边界或投影越界像素。"
+            ),
+            "",
+            "完整矩阵的 LR 一致覆盖率如下，便于在大图之外精确查数：",
+            "",
+            *matrix_coverage_lines,
+            "",
+            (
+                f"本帧矩阵中覆盖最高的组合是 D={best_matrix.disparities}, "
+                f"P1/P2={best_matrix.p1}/{best_matrix.p2}，LR 覆盖 "
+                f"{best_matrix.lr_consistent_coverage_pct:.1f}%。该结果只能说明"
+                "双向对应支持较多，不能替代真实深度误差或边界质量判断。"
+            ),
+            "",
+            (
+                f"{column_winner_text}。按行比较时，"
+                + "；".join(
+                    (
+                        f"D={disparity} 以 "
+                        f"{matrix_row_bests[disparity].p1}/"
+                        f"{matrix_row_bests[disparity].p2} 最高"
+                        f"（{matrix_row_bests[disparity].lr_consistent_coverage_pct:.1f}%）"
+                    )
+                    for disparity in args.disparity_values
+                )
+                + "。这些排名用于筛选复测候选，不能单独作为深度精度排名。"
+            ),
             "",
             "## D=128 在当前场景形成最佳范围折中",
             "",
@@ -1203,7 +1542,12 @@ def main() -> int:
     try:
         args = resolve_inputs(parse_args())
         validate_inputs(args)
-        range_configs, penalty_configs, unique_configs = build_configurations(args)
+        (
+            range_configs,
+            penalty_configs,
+            matrix_configs,
+            unique_configs,
+        ) = build_configurations(args)
         args.output.mkdir(parents=True, exist_ok=True)
         details_dir = args.output / "details"
         details_dir.mkdir(parents=True, exist_ok=True)
@@ -1452,6 +1796,18 @@ def main() -> int:
                 args.output / f"comparison_{stem}_lr.png",
             )
 
+        make_parameter_matrix(
+            args.disparity_values,
+            args.penalty_pair_values,
+            results_by_key,
+            raw_colors,
+            lr_colors,
+            args.lr_tolerance_px,
+            args.depth_min_mm,
+            args.depth_max_mm,
+            args.output / "comparison_D_P1_P2_matrix.png",
+        )
+
         make_metrics_dashboard(
             range_configs,
             results_by_key,
@@ -1481,6 +1837,31 @@ def main() -> int:
 
         write_metrics_csv(results, args.output / "metrics.csv")
         chart_map = [
+            {
+                "section": "Full D x P1/P2 matrix",
+                "question": (
+                    "How do D and P1/P2 jointly change raw and "
+                    "bidirectionally supported depth?"
+                ),
+                "type": "3x5 faceted image matrix",
+                "fields": [
+                    "D",
+                    "P1",
+                    "P2",
+                    "raw depth",
+                    "LR-consistent depth",
+                    "LR coverage",
+                    "saturation",
+                    "CPU time",
+                    "CPU working set",
+                ],
+                "palette": (
+                    f"fixed {args.depth_min_mm:g}-{args.depth_max_mm:g} mm "
+                    "TURBO reversed in all cells; "
+                    "black=zero/inconsistent/invalid"
+                ),
+                "artifact": "comparison_D_P1_P2_matrix.png",
+            },
             {
                 "section": "D range raw output",
                 "question": "How does D change the raw metric-depth result?",
@@ -1525,6 +1906,23 @@ def main() -> int:
                 "paths": 4,
                 "disparity_output": "uint8 integer pixels",
                 "not_opencv_stereosgbm": True,
+                "cpu_runtime_matching_parameters": ["D", "P1", "P2"],
+                "fixed_cpu_matching_configuration": {
+                    "cost": "5x5 Census / Hamming distance",
+                    "aggregation_paths": 4,
+                    "selection": "integer winner-takes-all",
+                    "confidence_or_postprocessing": "none",
+                },
+                "hls_compile_time_configuration_not_swept": [
+                    "TOTAL_DISPARITY",
+                    "WINDOW_SIZE",
+                    "PARALLEL_UNITS",
+                    "NUM_DIR",
+                    "HEIGHT",
+                    "WIDTH",
+                    "NPC",
+                    "input/output types and interface widths",
+                ],
             },
             "dataset": str(args.dataset),
             "left": str(args.left),
@@ -1537,6 +1935,8 @@ def main() -> int:
                 "range_p2": args.range_p2,
                 "penalty_disparity": args.penalty_disparity,
                 "penalty_pairs": [list(pair) for pair in args.penalty_pair_values],
+                "full_matrix": True,
+                "matrix_configuration_count": len(matrix_configs),
                 "depth_min_mm": args.depth_min_mm,
                 "depth_max_mm": args.depth_max_mm,
                 "left_runs": args.runs,
@@ -1569,6 +1969,7 @@ def main() -> int:
             calibration,
             range_configs,
             penalty_configs,
+            matrix_configs,
             unique_configs,
             results_by_key,
             (x0, y0, x1, y1),

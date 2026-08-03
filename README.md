@@ -148,10 +148,11 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
 ./scripts/run_vitis_sgbm_parameter_sweep.py
 ```
 
-默认执行两组受控实验：固定 `P1/P2=20/40` 比较 `D=64/128/256`，以及
-固定 `D=128` 比较 `P1/P2=10/20、20/40、40/80、10/40、20/80`。脚本
-同时保留原始核输出并执行外部左右一致性审计。需要注意，1280×800、D=256
-的标量 CPU 程序估算工作集约为 3.0 GiB，应确保主机有足够可用内存。
+默认执行完整的 3×5 参数矩阵：`D=64/128/256` 分别组合
+`P1/P2=10/20、20/40、40/80、10/40、20/80`，共 15 个唯一配置；报告还
+保留固定 `P1/P2=20/40` 的 D 切片和固定 `D=128` 的惩罚切片。脚本同时
+保留原始核输出并执行外部左右一致性审计。需要注意，1280×800、D=256 的
+标量 CPU 程序估算工作集约为 3.0 GiB，应确保主机有足够可用内存。
 
 当前 Gemini335 样本的完整结果见
 [Vitis-SGBM/SGM D 与 P1/P2 参数效果对比](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)。
@@ -201,12 +202,13 @@ Gemini335 1280×800 双目 IR 图已经完成 StereoBM 参数扫描，当前比�
 
 ### 6.2 Vitis-SGBM D/P1/P2 扫描
 
-同一组 Gemini335 图像还完成了 Vitis 标量 SGM 参考实现的 7 个唯一配置
-测试：固定 `P1/P2=20/40` 比较 `D=64/128/256`，并在 `D=128` 下比较
-五组平滑惩罚。报告同时展示原始核输出和容差 1 px 的外部左右一致性结果，
-避免把该实现强制产生的视差误称为可靠深度。
+同一组 Gemini335 图像还完成了 Vitis 标量 SGM 参考实现的 15 个唯一配置
+测试：逐一组合 `D=64/128/256` 与五组平滑惩罚。完整矩阵的每个格子同时
+展示原始核输出和容差 1 px 的外部左右一致性结果，避免把该实现强制产生的
+视差误称为可靠深度。
 
 - [完整 Markdown 报告：Vitis-SGBM/SGM D 与 P1/P2 参数效果对比](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)
+- [D×P1/P2 完整 3×5 参数矩阵](results/gemini335_1280x800_sgbm_sweep/comparison_D_P1_P2_matrix.png)
 - [D 范围原始深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_D_range_raw.png)
 - [D 范围左右一致深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_D_range_lr.png)
 - [P1/P2 左右一致深度对比](results/gemini335_1280x800_sgbm_sweep/comparison_penalties_lr.png)
