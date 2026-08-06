@@ -46,9 +46,10 @@ constexpr int kDefaultNumDisparities = 64;
 constexpr int kWindowSize = 5;
 constexpr int kDefaultSmallPenalty = 20;
 constexpr int kDefaultLargePenalty = 40;
+constexpr int kDefaultNumPaths = 4;
 
-// The Vitis example's NUM_DIR is 4. These are the exact four predecessor
-// directions used by its scalar CPU reference.
+// These are the Vitis scalar reference's predecessor directions in template
+// order. Selecting the first 2, 3, or 4 matches NUM_DIR=2, 3, or 4.
 constexpr std::pair<int, int> kDirections[] = {
     {0, -1},
     {-1, -1},
@@ -60,14 +61,14 @@ void printUsage(const char* program) {
     std::cerr
         << "Usage: " << program
         << " <left_gray_image> <right_gray_image> [output_raw.png]"
-           " [num_disparities] [p1] [p2]\n\n"
+           " [num_disparities] [p1] [p2] [paths]\n\n"
         << "Defaults (matching the Vitis sgbm example):\n"
         << "  output_raw       sgbm_disparity_raw.png\n"
         << "  num_disparities  " << kDefaultNumDisparities << "\n"
         << "  Census window    " << kWindowSize << "x" << kWindowSize << "\n"
         << "  P1/P2            " << kDefaultSmallPenalty << "/"
         << kDefaultLargePenalty << "\n"
-        << "  paths            4\n";
+        << "  paths            " << kDefaultNumPaths << " (allowed: 2, 3, 4)\n";
 }
 
 bool parseInteger(const char* text, int& value) {
@@ -88,7 +89,8 @@ bool validateInputs(const cv::Mat& left,
                     const cv::Mat& right,
                     int num_disparities,
                     int small_penalty,
-                    int large_penalty) {
+                    int large_penalty,
+                    int num_paths) {
     if (left.empty() || right.empty()) {
         std::cerr << "ERROR: failed to read one or both input images.\n";
         return false;
@@ -107,8 +109,14 @@ bool validateInputs(const cv::Mat& left,
         std::cerr << "ERROR: num_disparities must be smaller than the image width.\n";
         return false;
     }
-    if (small_penalty < 0 || large_penalty <= small_penalty) {
-        std::cerr << "ERROR: penalties must satisfy 0 <= P1 < P2.\n";
+    if (small_penalty < 0 || large_penalty <= small_penalty ||
+        large_penalty > 100) {
+        std::cerr << "ERROR: penalties must satisfy 0 <= P1 < P2 <= 100 "
+                     "for Vitis SemiGlobalBM.\n";
+        return false;
+    }
+    if (num_paths < 2 || num_paths > 4) {
+        std::cerr << "ERROR: paths must be one of 2, 3, or 4.\n";
         return false;
     }
     return true;
@@ -248,7 +256,8 @@ cv::Mat computeVitisSgm(const cv::Mat& left,
                         const cv::Mat& right,
                         int disparities,
                         int small_penalty,
-                        int large_penalty) {
+                        int large_penalty,
+                        int num_paths) {
     std::vector<std::uint32_t> left_census;
     std::vector<std::uint32_t> right_census;
     computeCensusTransform(left, left_census);
@@ -263,7 +272,8 @@ cv::Mat computeVitisSgm(const cv::Mat& left,
     std::vector<int> path_cost(volume_size);
     std::vector<int> aggregated_cost(volume_size, 0);
 
-    for (const auto& [delta_row, delta_col] : kDirections) {
+    for (int path = 0; path < num_paths; ++path) {
+        const auto [delta_row, delta_col] = kDirections[path];
         aggregateDirection(initial_cost,
                            left.rows,
                            left.cols,
@@ -308,7 +318,7 @@ double estimatedWorkingSetMiB(int rows, int cols, int disparities) {
 }  // namespace
 
 int main(int argc, char** argv) {
-    if (argc < 3 || argc > 7) {
+    if (argc < 3 || argc > 8) {
         printUsage(argv[0]);
         return EXIT_FAILURE;
     }
@@ -321,6 +331,7 @@ int main(int argc, char** argv) {
     int disparities = kDefaultNumDisparities;
     int small_penalty = kDefaultSmallPenalty;
     int large_penalty = kDefaultLargePenalty;
+    int num_paths = kDefaultNumPaths;
     if (argc >= 5 && !parseInteger(argv[4], disparities)) {
         std::cerr << "ERROR: invalid num_disparities: " << argv[4] << "\n";
         return EXIT_FAILURE;
@@ -333,11 +344,19 @@ int main(int argc, char** argv) {
         std::cerr << "ERROR: invalid P2: " << argv[6] << "\n";
         return EXIT_FAILURE;
     }
+    if (argc >= 8 && !parseInteger(argv[7], num_paths)) {
+        std::cerr << "ERROR: invalid paths: " << argv[7] << "\n";
+        return EXIT_FAILURE;
+    }
 
     const cv::Mat left = cv::imread(left_path, cv::IMREAD_GRAYSCALE);
     const cv::Mat right = cv::imread(right_path, cv::IMREAD_GRAYSCALE);
-    if (!validateInputs(
-            left, right, disparities, small_penalty, large_penalty)) {
+    if (!validateInputs(left,
+                        right,
+                        disparities,
+                        small_penalty,
+                        large_penalty,
+                        num_paths)) {
         return EXIT_FAILURE;
     }
 
@@ -347,7 +366,7 @@ int main(int argc, char** argv) {
               << "Census window:   " << kWindowSize << "x" << kWindowSize << "\n"
               << "P1/P2:           " << small_penalty << "/"
               << large_penalty << "\n"
-              << "Paths:           4\n"
+              << "Paths:           " << num_paths << "\n"
               << "Est. memory:     " << std::fixed << std::setprecision(1)
               << estimatedWorkingSetMiB(left.rows, left.cols, disparities)
               << " MiB\n";
@@ -355,8 +374,12 @@ int main(int argc, char** argv) {
     cv::Mat disparity_raw;
     const auto start = std::chrono::steady_clock::now();
     try {
-        disparity_raw = computeVitisSgm(
-            left, right, disparities, small_penalty, large_penalty);
+        disparity_raw = computeVitisSgm(left,
+                                        right,
+                                        disparities,
+                                        small_penalty,
+                                        large_penalty,
+                                        num_paths);
     } catch (const std::bad_alloc&) {
         std::cerr << "ERROR: not enough memory for the SGM cost volumes.\n";
         return EXIT_FAILURE;

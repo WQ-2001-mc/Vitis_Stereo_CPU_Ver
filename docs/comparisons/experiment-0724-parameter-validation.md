@@ -1,6 +1,6 @@
 # 0724 多距离室内场景参数验证
 
-> [返回项目 README](../README.md)
+> [返回项目 README](../../README.md)
 
 本文档使用用户指定的新数据集：
 
@@ -43,7 +43,7 @@
 下图在校正后的左右图同一高度画了水平参考线。标定板、电视和桌面结构在两幅
 图中均保持同一扫描线，未发现会直接破坏水平匹配的明显垂直错位。
 
-![0724 rectification check](../results/0724_imgs/rectification_check.png)
+![0724 rectification check](../../results/0724_imgs/rectification_check.png)
 
 
 ## 评价口径
@@ -74,7 +74,7 @@ Z_mm = 40669.158 / disparity_px
 
 固定 Census=5×5、4 路径、`P1/P2=20/40`，只改变视差范围：
 
-![0724 Vitis-SGM disparity range comparison](../results/0724_imgs/comparison_sgm_range.png)
+![0724 Vitis-SGM disparity range comparison](../../results/0724_imgs/comparison_sgm_range.png)
 
 | D | 理论最近深度 | 有效率 | 上限饱和率 | 回投残差中位数 | 残差 ≤ 15 | 局部异常率 | CPU 时间 | 预计内存 |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -135,7 +135,7 @@ BRAM_18K ≈ 2 × D + 24
 
 固定 `D=128`，按相同比例改变 `P1/P2`：
 
-![0724 Vitis-SGM penalty comparison](../results/0724_imgs/comparison_sgm_penalties.png)
+![0724 Vitis-SGM penalty comparison](../../results/0724_imgs/comparison_sgm_penalties.png)
 
 | P1/P2 | 有效率 | 上限饱和率 | 回投残差中位数 | 残差 ≤ 15 | 局部异常率 | CPU 时间 |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -158,15 +158,15 @@ SAD 窗口 `5×5/11×11/21×21`，共形成 3×3 参数矩阵。
 
 **D=64，理论最近深度约 645.5 mm：**
 
-![0724 StereoBM D64 block size comparison](../results/0724_imgs/comparison_bm_d64_block_size.png)
+![0724 StereoBM D64 block size comparison](../../results/0724_imgs/comparison_bm_d64_block_size.png)
 
 **D=128，理论最近深度约 320.2 mm：**
 
-![0724 StereoBM block size comparison](../results/0724_imgs/comparison_bm_block_size.png)
+![0724 StereoBM block size comparison](../../results/0724_imgs/comparison_bm_block_size.png)
 
 **D=256，理论最近深度约 159.5 mm：**
 
-![0724 StereoBM D256 block size comparison](../results/0724_imgs/comparison_bm_d256_block_size.png)
+![0724 StereoBM D256 block size comparison](../../results/0724_imgs/comparison_bm_d256_block_size.png)
 
 | D | 块大小 | 有效率 | 上限饱和率 | 回投残差中位数 | 残差 ≤ 15 | 局部异常率 | CPU 时间 |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -231,6 +231,6 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
 写入 `results/0724_imgs/details/`，该目录被 Git 忽略；本文档使用的结果和
 统计文件为：
 
-- [`results/0724_imgs/metrics.csv`](../results/0724_imgs/metrics.csv)
-- [`results/0724_imgs/metrics.json`](../results/0724_imgs/metrics.json)
-- [`results/0724_imgs/metadata.json`](../results/0724_imgs/metadata.json)
+- [`results/0724_imgs/metrics.csv`](../../results/0724_imgs/metrics.csv)
+- [`results/0724_imgs/metrics.json`](../../results/0724_imgs/metrics.json)
+- [`results/0724_imgs/metadata.json`](../../results/0724_imgs/metadata.json)

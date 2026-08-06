@@ -1,0 +1,159 @@
+{
+  "generated_at": "2026-08-05T22:17:15+08:00",
+  "verdict": "bit-exact",
+  "comparison": "optimized scalar R=3 output mapped through the exact PL depth LUT versus Vitis HLS 2021.1 C simulation of the production accelerator",
+  "fixed_hls_configuration": {
+    "width": 1280,
+    "height": 800,
+    "total_disparity": 128,
+    "parallel_units": 64,
+    "num_directions": 3,
+    "window_size": 5,
+    "input_type": "XF_8UC1",
+    "disparity_type": "XF_8UC1 integer pixels",
+    "depth_type": "XF_16UC1 millimetres"
+  },
+  "runtime_penalties": [
+    [
+      10,
+      20
+    ],
+    [
+      20,
+      40
+    ],
+    [
+      40,
+      80
+    ],
+    [
+      10,
+      40
+    ],
+    [
+      20,
+      80
+    ]
+  ],
+  "fx_times_baseline_mm_px": 31205.250210849994,
+  "depth_lut_rule": "d=0/1 -> 0; d=2..127 -> round(31205.250210849994/d) mm",
+  "common_roi": {
+    "x0": 138,
+    "y0": 10,
+    "x1": 1270,
+    "y1": 790
+  },
+  "source_sha256": {
+    "accelerator": {
+      "path": "/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp",
+      "sha256": "73c29777d109e59c916bc9f6012c7add84f7ea3359164098978e2cb6a030efcd"
+    },
+    "configuration": {
+      "path": "/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_config.hpp",
+      "sha256": "fa04a356bedcd5b0905a1fc68502cad1296d4b3ffe2e96f2646b8cd9049c774a"
+    },
+    "vitis_sgbm_header": {
+      "path": "/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include/imgproc/xf_sgbm.hpp",
+      "sha256": "eeadd5a9f01f20e56b1a643a1a293e2168605e1bce28681895d29568441b1539"
+    },
+    "left_input": {
+      "path": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/left_IR_IR Left.png",
+      "sha256": "bac2e64836fb5aade1b4e825062849485bd1707f7030c9b390edb8de07107cdd"
+    },
+    "right_input": {
+      "path": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/right_IR_IR Right.png",
+      "sha256": "d02d0574dcc6373bb03cdbe28f31235f057956107cab814d4d53907671db1325"
+    },
+    "calibration": {
+      "path": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/Gemini335_CP06563000SS_IR_1280x800_all.yaml",
+      "sha256": "a26c5e066ccfd339c4ed97bcf609e2e98c92a7fd5ffd8c70ada2980882a4d96b"
+    }
+  },
+  "results": [
+    {
+      "p1": 10,
+      "p2": 20,
+      "pixels": 1024000,
+      "different_pixels": 0,
+      "exact_match_pct": 100.0,
+      "maximum_abs_difference_mm": 0,
+      "hls_valid_pixels": 1010437,
+      "hls_valid_full_frame_pct": 98.67548828125,
+      "usable_roi_pct": 66.29360333423938,
+      "hls_valid_depth_p05_mm": 284.0,
+      "hls_valid_depth_p50_mm": 709.0,
+      "hls_valid_depth_p95_mm": 6241.0,
+      "usable_roi_depth_p50_mm": 529.0,
+      "scalar_lr_consistent_coverage_pct": 62.05819063151218,
+      "scalar_raw_local_outlier_gt2px_pct": 18.211504159729742
+    },
+    {
+      "p1": 20,
+      "p2": 40,
+      "pixels": 1024000,
+      "different_pixels": 0,
+      "exact_match_pct": 100.0,
+      "maximum_abs_difference_mm": 0,
+      "hls_valid_pixels": 1013280,
+      "hls_valid_full_frame_pct": 98.953125,
+      "usable_roi_pct": 60.137945093775485,
+      "hls_valid_depth_p05_mm": 292.0,
+      "hls_valid_depth_p50_mm": 867.0,
+      "hls_valid_depth_p95_mm": 6241.0,
+      "usable_roi_depth_p50_mm": 538.0,
+      "scalar_lr_consistent_coverage_pct": 69.9277430461176,
+      "scalar_raw_local_outlier_gt2px_pct": 8.553484304034901
+    },
+    {
+      "p1": 40,
+      "p2": 80,
+      "pixels": 1024000,
+      "different_pixels": 0,
+      "exact_match_pct": 100.0,
+      "maximum_abs_difference_mm": 0,
+      "hls_valid_pixels": 1015333,
+      "hls_valid_full_frame_pct": 99.15361328125,
+      "usable_roi_pct": 57.956192806016126,
+      "hls_valid_depth_p05_mm": 300.0,
+      "hls_valid_depth_p50_mm": 975.0,
+      "hls_valid_depth_p95_mm": 6241.0,
+      "usable_roi_depth_p50_mm": 547.0,
+      "scalar_lr_consistent_coverage_pct": 66.81469149225333,
+      "scalar_raw_local_outlier_gt2px_pct": 5.989262397987593
+    },
+    {
+      "p1": 10,
+      "p2": 40,
+      "pixels": 1024000,
+      "different_pixels": 0,
+      "exact_match_pct": 100.0,
+      "maximum_abs_difference_mm": 0,
+      "hls_valid_pixels": 1014283,
+      "hls_valid_full_frame_pct": 99.05107421875,
+      "usable_roi_pct": 58.843209205400015,
+      "hls_valid_depth_p05_mm": 297.0,
+      "hls_valid_depth_p50_mm": 946.0,
+      "hls_valid_depth_p95_mm": 6241.0,
+      "usable_roi_depth_p50_mm": 538.0,
+      "scalar_lr_consistent_coverage_pct": 75.33206487270091,
+      "scalar_raw_local_outlier_gt2px_pct": 5.720045983120267
+    },
+    {
+      "p1": 20,
+      "p2": 80,
+      "pixels": 1024000,
+      "different_pixels": 0,
+      "exact_match_pct": 100.0,
+      "maximum_abs_difference_mm": 0,
+      "hls_valid_pixels": 1015366,
+      "hls_valid_full_frame_pct": 99.1568359375,
+      "usable_roi_pct": 57.207121500407716,
+      "hls_valid_depth_p05_mm": 303.0,
+      "hls_valid_depth_p50_mm": 1007.0,
+      "hls_valid_depth_p95_mm": 6241.0,
+      "usable_roi_depth_p50_mm": 538.0,
+      "scalar_lr_consistent_coverage_pct": 72.87997191265742,
+      "scalar_raw_local_outlier_gt2px_pct": 3.5584209464046532
+    }
+  ]
+}

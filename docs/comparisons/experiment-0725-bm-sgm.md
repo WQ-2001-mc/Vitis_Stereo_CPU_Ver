@@ -1,6 +1,6 @@
 # 0725-test BM 与 SGBM 深度效果
 
-> [返回项目 README](../README.md)
+> [返回项目 README](../../README.md)
 
 本文档处理用户指定的数据集：
 
@@ -62,7 +62,7 @@ Z_mm = 40669.158 / disparity_px
 
 ## BM/SGBM 深度效果对比
 
-![0725-test BM and SGBM metric-depth comparison](../results/0725_test/comparison_bm_sgbm.png)
+![0725-test BM and SGBM metric-depth comparison](../../results/0725_test/comparison_bm_sgbm.png)
 
 | 算法 | 有效率 | 上限饱和率 | 回投残差中位数 | 残差 ≤ 15 | 局部异常率 | 中位视差 | ROI 中位深度 | CPU 时间 | 预计内存 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -158,6 +158,6 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
 `details/` 子目录；`results/0725_test/details/` 被 Git 忽略。本文档使用并
 纳入版本管理的结果为：
 
-- [`results/0725_test/metrics.csv`](../results/0725_test/metrics.csv)
-- [`results/0725_test/metrics.json`](../results/0725_test/metrics.json)
-- [`results/0725_test/metadata.json`](../results/0725_test/metadata.json)
+- [`results/0725_test/metrics.csv`](../../results/0725_test/metrics.csv)
+- [`results/0725_test/metrics.json`](../../results/0725_test/metrics.json)
+- [`results/0725_test/metadata.json`](../../results/0725_test/metadata.json)

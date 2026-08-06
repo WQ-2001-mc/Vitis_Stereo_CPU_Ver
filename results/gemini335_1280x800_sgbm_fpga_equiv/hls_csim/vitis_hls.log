@@ -1,0 +1,90 @@
+
+****** Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2021.1 (64-bit)
+  **** SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+  **** IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+    ** Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+source /tools/Xilinx/Vitis_HLS/2021.1/scripts/vitis_hls/hls.tcl -notrace
+INFO: Applying HLS Y2K22 patch v1.2 for IP revision
+INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2021.1/bin/unwrapped/lnx64.o/vitis_hls'
+INFO: [HLS 200-10] For user 'hcc' on host 'hcc-B760M-GAMING-X-DDR4' (Linux_x86_64 version 5.15.0-139-generic) on Wed Aug 05 22:02:01 CST 2026
+INFO: [HLS 200-10] On os Ubuntu 20.04.6 LTS
+INFO: [HLS 200-10] In directory '/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver'
+Sourcing Tcl script 'hls_csim/run_dataset_csim.tcl'
+INFO: [HLS 200-1510] Running: open_project -reset gemini335_dataset_hls_csim 
+INFO: [HLS 200-10] Creating and opening project '/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/build/gemini335_dataset_hls_csim'.
+INFO: [HLS 200-1510] Running: set_top gemini335_sgbm_accel 
+INFO: [HLS 200-1510] Running: add_files /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp -cflags -O3 -I/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls -I/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include -std=c++0x 
+INFO: [HLS 200-10] Adding design file '/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/hls_csim/tb_gemini335_dataset.cpp -cflags -O3 -I/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls -I/home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include -std=c++0x 
+INFO: [HLS 200-10] Adding test bench file '/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/hls_csim/tb_gemini335_dataset.cpp' to the project
+INFO: [HLS 200-1510] Running: open_solution -reset sol1 
+INFO: [HLS 200-10] Creating and opening solution '/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/build/gemini335_dataset_hls_csim/sol1'.
+INFO: [HLS 200-10] Cleaning up the solution database.
+WARNING: [HLS 200-40] No /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/build/gemini335_dataset_hls_csim/sol1/sol1.aps file found.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-1505.html
+INFO: [HLS 200-1510] Running: set_part xczu5ev-sfvc784-2-i 
+INFO: [HLS 200-1611] Setting target device to 'xczu5ev-sfvc784-2-i'
+INFO: [HLS 200-1510] Running: create_clock -period 6.5 -name default 
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 6.5ns.
+INFO: [HLS 200-1510] Running: csim_design -clean 
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
+   Compiling ../../../../../hls_csim/tb_gemini335_dataset.cpp in debug mode
+   Compiling ../../../../../../FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp in debug mode
+   Generating csim.exe
+In file included from /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include/common/xf_structs.hpp:27:0,
+                 from /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include/common/xf_common.hpp:20,
+                 from /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_config.hpp:14,
+                 from ../../../../../hls_csim/tb_gemini335_dataset.cpp:1:
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:97:45: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <typename T> constexpr std::size_t bitwidth = sizeof(T) * CHAR_BIT;
+                                             ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:99:48: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <std::size_t W> constexpr std::size_t bitwidth<ap_int<W>> = W;
+                                                ^~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:100:48: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <std::size_t W> constexpr std::size_t bitwidth<ap_uint<W>> = W;
+                                                ^~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:102:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bitwidth<ap_fixed<_AP_W, _AP_I, _AP_Q, _AP_O, _AP_N>> = _AP_W;
+                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:104:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bitwidth<ap_ufixed<_AP_W, _AP_I, _AP_Q, _AP_O, _AP_N>> = _AP_W;
+                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:107:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bytewidth = (bitwidth<T> + CHAR_BIT - 1) / CHAR_BIT;
+                       ^~~~~~~~~
+In file included from /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include/common/xf_structs.hpp:27:0,
+                 from /home/hcc/Desktop/HXB/FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/include/common/xf_common.hpp:20,
+                 from ../../../../../../FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_config.hpp:14,
+                 from ../../../../../../FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp:8:
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:97:45: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <typename T> constexpr std::size_t bitwidth = sizeof(T) * CHAR_BIT;
+                                             ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:99:48: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <std::size_t W> constexpr std::size_t bitwidth<ap_int<W>> = W;
+                                                ^~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:100:48: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ template <std::size_t W> constexpr std::size_t bitwidth<ap_uint<W>> = W;
+                                                ^~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:102:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bitwidth<ap_fixed<_AP_W, _AP_I, _AP_Q, _AP_O, _AP_N>> = _AP_W;
+                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:104:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bitwidth<ap_ufixed<_AP_W, _AP_I, _AP_Q, _AP_O, _AP_N>> = _AP_W;
+                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tools/Xilinx/Vitis_HLS/2021.1/include/ap_axi_sdata.h:107:23: warning: variable templates only available with -std=c++14 or -std=gnu++14
+ constexpr std::size_t bytewidth = (bitwidth<T> + CHAR_BIT - 1) / CHAR_BIT;
+                       ^~~~~~~~~
+GEMINI335_DATASET_CSIM P1=10 P2=20 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1010437 max_depth_mm=15603 checksum=1957464065 host_csim_seconds=33.037 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_010_p2_020.pgm
+GEMINI335_DATASET_CSIM P1=20 P2=40 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1013280 max_depth_mm=15603 checksum=2287118199 host_csim_seconds=32.803 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_020_p2_040.pgm
+GEMINI335_DATASET_CSIM P1=40 P2=80 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1015333 max_depth_mm=15603 checksum=2411010840 host_csim_seconds=32.978 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_040_p2_080.pgm
+GEMINI335_DATASET_CSIM P1=10 P2=40 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1014283 max_depth_mm=15603 checksum=2417316571 host_csim_seconds=33.316 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_010_p2_040.pgm
+GEMINI335_DATASET_CSIM P1=20 P2=80 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1015366 max_depth_mm=15603 checksum=2496357301 host_csim_seconds=32.966 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_020_p2_080.pgm
+GEMINI335_DATASET_CSIM_PASS configurations=5
+INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 169.52 seconds. CPU system time: 0.43 seconds. Elapsed time: 169.32 seconds; current allocated memory: 315.221 MB.
+INFO: [Common 17-206] Exiting vitis_hls at Wed Aug  5 22:04:51 2026...

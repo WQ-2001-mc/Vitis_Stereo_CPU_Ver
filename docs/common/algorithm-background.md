@@ -1,6 +1,6 @@
 # 原目录里是不是有 BM 和 SGBM 两套算法？
 
-> [返回项目 README](../README.md)
+> [返回项目 README](../../README.md)
 
 是。两套核心算法及原始入口如下：
 

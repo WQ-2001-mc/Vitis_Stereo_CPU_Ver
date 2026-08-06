@@ -1,0 +1,13 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch GCC as the compiler.
+   Compiling ../../../../../hls_csim/tb_gemini335_dataset.cpp in debug mode
+   Compiling ../../../../../../FPGA_Camera_V2/0805-AXU5EVB_Board_SGBM_1280x800/Vitis_Libraries/vision/L1/examples/gemini335_sgbm_pl/hls/gemini335_sgbm_accel.cpp in debug mode
+   Generating csim.exe
+GEMINI335_DATASET_CSIM P1=10 P2=20 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1010437 max_depth_mm=15603 checksum=1957464065 host_csim_seconds=33.037 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_010_p2_020.pgm
+GEMINI335_DATASET_CSIM P1=20 P2=40 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1013280 max_depth_mm=15603 checksum=2287118199 host_csim_seconds=32.803 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_020_p2_040.pgm
+GEMINI335_DATASET_CSIM P1=40 P2=80 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1015333 max_depth_mm=15603 checksum=2411010840 host_csim_seconds=32.978 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_040_p2_080.pgm
+GEMINI335_DATASET_CSIM P1=10 P2=40 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1014283 max_depth_mm=15603 checksum=2417316571 host_csim_seconds=33.316 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_010_p2_040.pgm
+GEMINI335_DATASET_CSIM P1=20 P2=80 rows=800 cols=1280 D=128 PU=64 R=3 W=5 valid=1015366 max_depth_mm=15603 checksum=2496357301 host_csim_seconds=32.966 output=/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim/hls_depth_p1_020_p2_080.pgm
+GEMINI335_DATASET_CSIM_PASS configurations=5
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

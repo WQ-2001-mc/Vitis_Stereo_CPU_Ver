@@ -1,0 +1,321 @@
+{
+  "generated_at": "2026-08-05T22:15:29+08:00",
+  "project_root": "/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver",
+  "cpp_binary": "/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/build/vitis_sgbm_cpu",
+  "algorithm": {
+    "name": "Vitis scalar SGM CPU reference",
+    "source": "src/vitis_sgbm_cpu.cpp",
+    "census_window": "5x5",
+    "paths": 3,
+    "disparity_output": "uint8 integer pixels",
+    "not_opencv_stereosgbm": true,
+    "cpu_runtime_matching_parameters": [
+      "D",
+      "P1",
+      "P2"
+    ],
+    "fixed_cpu_matching_configuration": {
+      "cost": "5x5 Census / Hamming distance",
+      "aggregation_paths": 3,
+      "selection": "integer winner-takes-all",
+      "confidence_or_postprocessing": "none"
+    },
+    "hls_compile_time_configuration_not_swept": [
+      "TOTAL_DISPARITY",
+      "WINDOW_SIZE",
+      "PARALLEL_UNITS",
+      "NUM_DIR",
+      "HEIGHT",
+      "WIDTH",
+      "NPC",
+      "input/output types and interface widths"
+    ]
+  },
+  "dataset": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data",
+  "left": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/left_IR_IR Left.png",
+  "right": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/right_IR_IR Right.png",
+  "calibration_path": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/Gemini335_CP06563000SS_IR_1280x800_all.yaml",
+  "calibration": {
+    "source": "/home/hcc/Desktop/Public/datasets/gemini335/1280*800分辨率/data/Gemini335_CP06563000SS_IR_1280x800_all.yaml",
+    "image_width": 1280,
+    "image_height": 800,
+    "input_rectified": true,
+    "focal_px": 619.2955322,
+    "baseline_mm": 50.38830185,
+    "disparity_offset_px": 0.0,
+    "fx_baseline_mm_px": 31205.250210849994
+  },
+  "parameters": {
+    "range_disparities": [
+      128
+    ],
+    "range_p1": 20,
+    "range_p2": 40,
+    "penalty_disparity": 128,
+    "penalty_pairs": [
+      [
+        10,
+        20
+      ],
+      [
+        20,
+        40
+      ],
+      [
+        40,
+        80
+      ],
+      [
+        10,
+        40
+      ],
+      [
+        20,
+        80
+      ]
+    ],
+    "full_matrix": true,
+    "matrix_configuration_count": 5,
+    "depth_min_mm": 300.0,
+    "depth_max_mm": 3000.0,
+    "left_runs": 3,
+    "right_audit_runs": 1,
+    "lr_tolerance_px": 1,
+    "paths": 3,
+    "resume_used": true
+  },
+  "common_roi": {
+    "x0": 138,
+    "y0": 10,
+    "x1": 1270,
+    "y1": 790
+  },
+  "software": {
+    "python": "3.13.12",
+    "python_opencv": "4.13.0",
+    "numpy": "2.4.4"
+  },
+  "chart_map": [
+    {
+      "section": "Full D x P1/P2 matrix",
+      "question": "How do D and P1/P2 jointly change raw and bidirectionally supported depth?",
+      "type": "3x5 faceted image matrix",
+      "fields": [
+        "D",
+        "P1",
+        "P2",
+        "raw depth",
+        "LR-consistent depth",
+        "LR coverage",
+        "saturation",
+        "CPU time",
+        "CPU working set"
+      ],
+      "palette": "fixed 300-3000 mm TURBO reversed in all cells; black=zero/inconsistent/invalid",
+      "artifact": "comparison_D_P1_P2_matrix.png"
+    },
+    {
+      "section": "D range raw output",
+      "question": "How does D change the raw metric-depth result?",
+      "type": "horizontal small multiples",
+      "fields": [
+        "D",
+        "raw depth"
+      ],
+      "palette": "fixed 300-3000 mm TURBO reversed; black=zero disparity",
+      "artifact": "comparison_D_range_raw.png"
+    },
+    {
+      "section": "D range LR audit",
+      "question": "How much depth survives bidirectional consistency?",
+      "type": "horizontal small multiples",
+      "fields": [
+        "D",
+        "LR-consistent depth"
+      ],
+      "palette": "same fixed depth scale; black=inconsistent/invalid",
+      "artifact": "comparison_D_range_lr.png"
+    },
+    {
+      "section": "Penalty raw output",
+      "question": "How do P1/P2 choices change raw depth structure?",
+      "type": "horizontal small multiples",
+      "fields": [
+        "P1",
+        "P2",
+        "raw depth"
+      ],
+      "palette": "same fixed depth scale",
+      "artifact": "comparison_penalties_raw.png"
+    },
+    {
+      "section": "Penalty LR audit",
+      "question": "Which P1/P2 choices retain bidirectional support?",
+      "type": "horizontal small multiples",
+      "fields": [
+        "P1",
+        "P2",
+        "LR-consistent depth"
+      ],
+      "palette": "same fixed depth scale",
+      "artifact": "comparison_penalties_lr.png"
+    }
+  ],
+  "results": [
+    {
+      "disparities": 128,
+      "p1": 10,
+      "p2": 20,
+      "nearest_depth_mm": 245.71063158149602,
+      "raw_positive_coverage_pct": 99.7121047386065,
+      "raw_usable_coverage_pct": 99.54210836277974,
+      "disparity_saturation_pct": 0.16999637582676452,
+      "lr_consistent_coverage_pct": 62.05819063151218,
+      "lr_acceptance_of_raw_pct": 62.34365702335943,
+      "raw_photometric_median_abs_error_gray": 3.0,
+      "raw_photometric_inlier_le15_pct": 80.31816428627504,
+      "lr_photometric_median_abs_error_gray": 4.0,
+      "lr_photometric_inlier_le15_pct": 77.98517745264614,
+      "raw_local_outlier_gt2px_pct": 18.211504159729742,
+      "lr_local_outlier_gt2px_pct": 0.008842403112525895,
+      "lr_median_disparity_px": 48.0,
+      "lr_depth_p10_mm": 325.0546875,
+      "lr_depth_median_mm": 650.109375,
+      "lr_depth_p90_mm": 6241.0498046875,
+      "cpp_compute_median_ms": 1809.572,
+      "cpp_compute_min_ms": 1804.991,
+      "cpp_compute_max_ms": 1812.179,
+      "right_audit_compute_ms": 1808.432,
+      "estimated_cpu_working_set_mib": 1507.8,
+      "repeated_raw_output_match_pct": 100.0,
+      "cpp_raw_visual_match_pct": 100.0,
+      "common_roi_pixels": 882960,
+      "lr_consistent_pixels": 547949,
+      "config_directory": "details/d128_p1010_p2020"
+    },
+    {
+      "disparities": 128,
+      "p1": 20,
+      "p2": 40,
+      "nearest_depth_mm": 245.71063158149602,
+      "raw_positive_coverage_pct": 99.88708435263206,
+      "raw_usable_coverage_pct": 99.79999093956691,
+      "disparity_saturation_pct": 0.08709341306514451,
+      "lr_consistent_coverage_pct": 69.9277430461176,
+      "lr_acceptance_of_raw_pct": 70.06788516490126,
+      "raw_photometric_median_abs_error_gray": 3.0,
+      "raw_photometric_inlier_le15_pct": 80.54605455779317,
+      "lr_photometric_median_abs_error_gray": 3.0,
+      "lr_photometric_inlier_le15_pct": 80.54366944483135,
+      "raw_local_outlier_gt2px_pct": 8.553484304034901,
+      "lr_local_outlier_gt2px_pct": 0.022720633581096432,
+      "lr_median_disparity_px": 38.0,
+      "lr_depth_p10_mm": 335.5403137207031,
+      "lr_depth_median_mm": 821.1907958984375,
+      "lr_depth_p90_mm": 6241.0498046875,
+      "cpp_compute_median_ms": 1826.157,
+      "cpp_compute_min_ms": 1819.701,
+      "cpp_compute_max_ms": 1832.142,
+      "right_audit_compute_ms": 1813.151,
+      "estimated_cpu_working_set_mib": 1507.8,
+      "repeated_raw_output_match_pct": 100.0,
+      "cpp_raw_visual_match_pct": 100.0,
+      "common_roi_pixels": 882960,
+      "lr_consistent_pixels": 617434,
+      "config_directory": "details/d128_p1020_p2040"
+    },
+    {
+      "disparities": 128,
+      "p1": 40,
+      "p2": 80,
+      "nearest_depth_mm": 245.71063158149602,
+      "raw_positive_coverage_pct": 99.97078010328893,
+      "raw_usable_coverage_pct": 99.92196702002356,
+      "disparity_saturation_pct": 0.048813083265380086,
+      "lr_consistent_coverage_pct": 66.81469149225333,
+      "lr_acceptance_of_raw_pct": 66.86686970329978,
+      "raw_photometric_median_abs_error_gray": 3.0,
+      "raw_photometric_inlier_le15_pct": 79.5594550880625,
+      "lr_photometric_median_abs_error_gray": 3.0,
+      "lr_photometric_inlier_le15_pct": 82.22603047392393,
+      "raw_local_outlier_gt2px_pct": 5.989262397987593,
+      "lr_local_outlier_gt2px_pct": 0.020564002028981534,
+      "lr_median_disparity_px": 21.0,
+      "lr_depth_p10_mm": 346.7250061035156,
+      "lr_depth_median_mm": 1485.9642333984375,
+      "lr_depth_p90_mm": 6241.0498046875,
+      "cpp_compute_median_ms": 1818.243,
+      "cpp_compute_min_ms": 1811.892,
+      "cpp_compute_max_ms": 1826.405,
+      "right_audit_compute_ms": 1817.848,
+      "estimated_cpu_working_set_mib": 1507.8,
+      "repeated_raw_output_match_pct": 100.0,
+      "cpp_raw_visual_match_pct": 100.0,
+      "common_roi_pixels": 882960,
+      "lr_consistent_pixels": 589947,
+      "config_directory": "details/d128_p1040_p2080"
+    },
+    {
+      "disparities": 128,
+      "p1": 10,
+      "p2": 40,
+      "nearest_depth_mm": 245.71063158149602,
+      "raw_positive_coverage_pct": 99.95028087342575,
+      "raw_usable_coverage_pct": 99.90656428377277,
+      "disparity_saturation_pct": 0.043716589652985416,
+      "lr_consistent_coverage_pct": 75.33206487270091,
+      "lr_acceptance_of_raw_pct": 75.40251775521887,
+      "raw_photometric_median_abs_error_gray": 3.0,
+      "raw_photometric_inlier_le15_pct": 81.02626015292444,
+      "lr_photometric_median_abs_error_gray": 3.0,
+      "lr_photometric_inlier_le15_pct": 80.03539040700471,
+      "raw_local_outlier_gt2px_pct": 5.720045983120267,
+      "lr_local_outlier_gt2px_pct": 0.01001105568758542,
+      "lr_median_disparity_px": 41.0,
+      "lr_depth_p10_mm": 335.5403137207031,
+      "lr_depth_median_mm": 761.1036376953125,
+      "lr_depth_p90_mm": 6241.0498046875,
+      "cpp_compute_median_ms": 1816.769,
+      "cpp_compute_min_ms": 1815.906,
+      "cpp_compute_max_ms": 1817.883,
+      "right_audit_compute_ms": 1815.621,
+      "estimated_cpu_working_set_mib": 1507.8,
+      "repeated_raw_output_match_pct": 100.0,
+      "cpp_raw_visual_match_pct": 100.0,
+      "common_roi_pixels": 882960,
+      "lr_consistent_pixels": 665152,
+      "config_directory": "details/d128_p1010_p2040"
+    },
+    {
+      "disparities": 128,
+      "p1": 20,
+      "p2": 80,
+      "nearest_depth_mm": 245.71063158149602,
+      "raw_positive_coverage_pct": 99.98788167074386,
+      "raw_usable_coverage_pct": 99.96341850140436,
+      "disparity_saturation_pct": 0.02446316933949443,
+      "lr_consistent_coverage_pct": 72.87997191265742,
+      "lr_acceptance_of_raw_pct": 72.90664225497005,
+      "raw_photometric_median_abs_error_gray": 3.0,
+      "raw_photometric_inlier_le15_pct": 79.6061121389654,
+      "lr_photometric_median_abs_error_gray": 3.0,
+      "lr_photometric_inlier_le15_pct": 80.37532187207168,
+      "raw_local_outlier_gt2px_pct": 3.5584209464046532,
+      "lr_local_outlier_gt2px_pct": 0.01569290724184078,
+      "lr_median_disparity_px": 29.0,
+      "lr_depth_p10_mm": 339.1875,
+      "lr_depth_median_mm": 1076.0430908203125,
+      "lr_depth_p90_mm": 6241.0498046875,
+      "cpp_compute_median_ms": 1846.339,
+      "cpp_compute_min_ms": 1821.106,
+      "cpp_compute_max_ms": 1875.22,
+      "right_audit_compute_ms": 1821.999,
+      "estimated_cpu_working_set_mib": 1507.8,
+      "repeated_raw_output_match_pct": 100.0,
+      "cpp_raw_visual_match_pct": 100.0,
+      "common_roi_pixels": 882960,
+      "lr_consistent_pixels": 643501,
+      "config_directory": "details/d128_p1020_p2080"
+    }
+  ]
+}

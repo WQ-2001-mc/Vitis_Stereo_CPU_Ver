@@ -1,6 +1,6 @@
 # Gemini335 0724 与之前相机的同场景横向对比
 
-> [返回项目 README](../README.md)
+> [返回项目 README](../../README.md)
 
 本文档使用以下 Gemini335 数据和同目录标定参数：
 
@@ -50,7 +50,7 @@ Z_mm = rectified_fx_px × baseline_mm / (disparity_px + doffs_px)
 等对应结构均落在相同水平参考线上，没有观察到会直接破坏水平视差搜索的明显
 垂直错位。
 
-![Gemini335 0724 rectification check](../results/gemini335_0724/rectification_check.png)
+![Gemini335 0724 rectification check](../../results/gemini335_0724/rectification_check.png)
 
 
 ## 两种 CPU 算法的 Gemini335 结果
@@ -58,7 +58,7 @@ Z_mm = rectified_fx_px × baseline_mm / (disparity_px + doffs_px)
 评价区域使用图中绿色框。它在两台相机上取相同的归一化坐标范围
 `(0.23W, 0.02H)–(0.984W, 0.98H)`，并保证左边界大于 `D=128` 的搜索盲区。
 
-![Gemini335 BM/SGBM CPU comparison](../results/gemini335_0724/comparison_gemini335_algorithms.png)
+![Gemini335 BM/SGBM CPU comparison](../../results/gemini335_0724/comparison_gemini335_algorithms.png)
 
 | 算法 | 有效率 | 上限饱和率 | 回投残差中位数 | 残差 ≤ 15 | 局部异常率 | 中位视差 | ROI 中位深度 | CPU 时间 | 预计内存 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -87,7 +87,7 @@ BM 的 C++ 程序原本只写 8 位显示图。评测脚本另外通过完全相
 使用的之前自研相机，右列是 Gemini335。两台相机的分辨率、宽高比、视场、
 焦距和基线不同，因此图像经过等比留黑边显示，没有拉伸到相同形状。
 
-![Gemini335 versus previous camera](../results/gemini335_0724/comparison_previous_camera.png)
+![Gemini335 versus previous camera](../../results/gemini335_0724/comparison_previous_camera.png)
 
 | 算法与指标 | 之前自研相机 | Gemini335 | 变化 |
 |---|---:|---:|---:|
@@ -152,6 +152,6 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
 详细中间结果位于 `results/gemini335_0724/details/`，该目录被 Git 忽略；
 本文档使用并纳入版本管理的结果为：
 
-- [`results/gemini335_0724/metrics.csv`](../results/gemini335_0724/metrics.csv)
-- [`results/gemini335_0724/metrics.json`](../results/gemini335_0724/metrics.json)
-- [`results/gemini335_0724/metadata.json`](../results/gemini335_0724/metadata.json)
+- [`results/gemini335_0724/metrics.csv`](../../results/gemini335_0724/metrics.csv)
+- [`results/gemini335_0724/metrics.json`](../../results/gemini335_0724/metrics.json)
+- [`results/gemini335_0724/metadata.json`](../../results/gemini335_0724/metadata.json)

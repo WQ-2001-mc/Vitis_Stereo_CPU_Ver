@@ -36,11 +36,11 @@
 | 程序 | 算法 | 实现来源 | 默认配置 |
 |---|---|---|---|
 | `vitis_bm_cpu` | StereoBM，局部 SAD 块匹配 | OpenCV `cv::StereoBM` | `D=32`，`block=11` |
-| `vitis_sgbm_cpu` | Census 代价 + 4 路径 SGM | Vitis SGBM 测试台的标量 CPU 参考实现 | `D=64`，Census 5×5，`P1/P2=20/40` |
+| `vitis_sgbm_cpu` | Census 代价 + 2/3/4 路径 SGM | Vitis SGBM 测试台的标量 CPU 参考实现 | `D=64`，Census 5×5，`P1/P2=20/40`，默认 4 路径 |
 
 这里的 `vitis_sgbm_cpu` 不是 OpenCV `cv::StereoSGBM`。Vitis 示例目录名和
 硬件接口使用 SGBM/SemiGlobalBM，而提取出的 CPU 参考函数实际执行
-Census + 4 路径 SGM。
+Census + 可选 2/3/4 路径 SGM；默认保持原 4 路径行为，当前 Gemini335 FPGA 等效实验使用 3 路径。
 
 ## 3. 快速开始
 
@@ -168,7 +168,7 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
   `output/sgbm_disparity_raw_visual.png`。
 
 原始视差格式、内存优化方式等细节见
-[输出格式说明](docs/output-format.md)。
+[输出格式说明](docs/common/output-format.md)。
 
 ## 5. 参数建议
 
@@ -181,7 +181,7 @@ cd /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver
 
 这些参数来自当前相机、标定和数据集，不应直接视为其他相机的最优值。完整的
 量化结果、适用边界和资源取舍见
-[0.5–3 m 参数与定量汇总](docs/parameter-recommendations.md)。
+[0.5–3 m 参数与定量汇总](docs/comparisons/parameter-recommendations.md)。
 
 ## 6. 最新参数扫描结果
 
@@ -200,7 +200,19 @@ Gemini335 1280×800 双目 IR 图已经完成 StereoBM 参数扫描，当前比�
 `D=128/W=9` 作为更小窗口的硬件候选。CPU 参考时间不能直接视为 FPGA
 延时，资源和时序仍需通过对应 HLS 顶层的 C 综合报告评估。
 
-### 6.2 Vitis-SGBM D/P1/P2 扫描
+### 6.2 Vitis-SGBM 参数扫描与 FPGA 等效验证
+
+当前 Gemini335 1280×800 FPGA/HLS 配置为
+`D=128、PU=64、NUM_DIR=3、W=5`。针对五组 P1/P2 的全分辨率 HLS C 仿真
+和三路径优化 CPU 扫描已经完成，五组均达到 100% 逐像素一致：
+
+- [Gemini335 1280×800 Vitis-SGBM FPGA 等效参数对比](docs/sgbm/gemini335-1280x800-vitis-sgbm-fpga-equivalent.md)
+- [真实 HLS C 仿真 P1/P2 深度效果](results/gemini335_1280x800_sgbm_fpga_equiv/comparison_hls_csim_penalties.png)
+- [外部左右一致性效果](results/gemini335_1280x800_sgbm_fpga_equiv/comparison_penalties_lr.png)
+- [HLS C 仿真逐像素验证 CSV](results/gemini335_1280x800_sgbm_fpga_equiv/hls_csim_validation.csv)
+
+以下旧版 15 组结果使用四路径标量参考，适合观察 D/P1/P2 的趋势，但不应直接
+当作当前三路径 FPGA 核的等效输出。
 
 同一组 Gemini335 图像还完成了 Vitis 标量 SGM 参考实现的 15 个唯一配置
 测试：逐一组合 `D=64/128/256` 与五组平滑惩罚。完整矩阵的每个格子同时
@@ -226,9 +238,9 @@ Vitis_Stereo_CPU_Ver/
 ├── run_cpu_tests.sh               # 编译并依次运行两种算法
 ├── src/
 │   ├── vitis_bm_cpu.cpp           # OpenCV StereoBM CPU 程序
-│   └── vitis_sgbm_cpu.cpp         # Vitis Census + 4 路径 SGM CPU 程序
+│   └── vitis_sgbm_cpu.cpp         # Vitis Census + 可选 2/3/4 路径 SGM CPU 程序
 ├── scripts/                       # 数据集评估与结果生成脚本
-├── docs/                          # 文档索引、算法、参数和实验报告
+├── docs/                          # 按 SBM、SGBM、公共说明和对比实验分类的文档
 ├── results/                       # 纳入版本管理的图表与指标
 ├── output/                        # 本地运行输出，Git 忽略
 └── README.md
@@ -239,20 +251,24 @@ CSV、JSON 和元数据保留在各结果目录的顶层。
 
 ## 8. 详细文档
 
-### 8.1 原理与使用说明
+### 8.1 算法与使用说明
 
-- [BM/SGBM/SGM 的来源与区别](docs/algorithm-background.md)
-- [输出格式与内存实现说明](docs/output-format.md)
-- [0.5–3 m 参数与定量汇总](docs/parameter-recommendations.md)
+- [完整文档分类索引](docs/README.md)
+- [SBM（项目中称 BM / StereoBM）](docs/sbm/README.md)
+- [SGBM（项目中称 Vitis-SGM）](docs/sgbm/README.md)
+- [BM/SGBM/SGM 的来源与区别](docs/common/algorithm-background.md)
+- [输出格式与内存实现说明](docs/common/output-format.md)
+- [0.5–3 m 参数与定量汇总](docs/comparisons/parameter-recommendations.md)
 
 ### 8.2 实验报告
 
-- [自研相机 50 cm / 75 cm 深度实验](docs/experiment-camera-50cm-75cm.md)
-- [0724 多距离室内场景参数验证](docs/experiment-0724-parameter-validation.md)
-- [Gemini335 与之前相机同场景对比](docs/experiment-gemini335-comparison.md)
+- [自研相机 50 cm / 75 cm 深度实验](docs/comparisons/experiment-camera-50cm-75cm.md)
+- [0724 多距离室内场景参数验证](docs/comparisons/experiment-0724-parameter-validation.md)
+- [Gemini335 与之前相机同场景对比](docs/comparisons/experiment-gemini335-comparison.md)
 - [Gemini335 1280×800 StereoBM D/W 深度图横向对比](results/gemini335_1280x800_bm_sweep/STEREOBM_DEPTH_COMPARISON.md)
 - [Gemini335 1280×800 Vitis-SGBM D/P1/P2 参数效果](results/gemini335_1280x800_sgbm_sweep/VITIS_SGBM_PARAMETER_COMPARISON.md)
-- [0725-test BM 与 Vitis-SGM 深度效果](docs/experiment-0725-bm-sgm.md)
+- [Gemini335 1280×800 Vitis-SGBM FPGA 等效参数对比](docs/sgbm/gemini335-1280x800-vitis-sgbm-fpga-equivalent.md)
+- [0725-test BM 与 Vitis-SGM 深度效果](docs/comparisons/experiment-0725-bm-sgm.md)
 
 ## 9. License
 

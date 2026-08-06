@@ -1,6 +1,6 @@
 # 自研相机 50 cm / 75 cm 深度实验
 
-> [返回项目 README](../README.md)
+> [返回项目 README](../../README.md)
 
 数据集：
 
@@ -48,12 +48,12 @@ Z_mm = fx_px × baseline_mm / disparity_px
 
 ### 50 cm
 
-![50 cm BM/SGBM depth comparison](../results/camera_dataset/comparison_50cm.png)
+![50 cm BM/SGBM depth comparison](../../results/camera_dataset/comparison_50cm.png)
 
 
 ### 75 cm
 
-![75 cm BM/SGBM depth comparison](../results/camera_dataset/comparison_75cm.png)
+![75 cm BM/SGBM depth comparison](../../results/camera_dataset/comparison_75cm.png)
 
 所有单独的视差图、16 位毫米深度图和伪彩深度图位于：
 
@@ -117,9 +117,9 @@ results/camera_dataset/75cm
 
 完整机器可读统计：
 
-- [`results/camera_dataset/metrics.csv`](../results/camera_dataset/metrics.csv)
-- [`results/camera_dataset/metrics.json`](../results/camera_dataset/metrics.json)
-- [`results/camera_dataset/metadata.json`](../results/camera_dataset/metadata.json)
+- [`results/camera_dataset/metrics.csv`](../../results/camera_dataset/metrics.csv)
+- [`results/camera_dataset/metrics.json`](../../results/camera_dataset/metrics.json)
+- [`results/camera_dataset/metadata.json`](../../results/camera_dataset/metadata.json)
 
 
 ## 建议参数

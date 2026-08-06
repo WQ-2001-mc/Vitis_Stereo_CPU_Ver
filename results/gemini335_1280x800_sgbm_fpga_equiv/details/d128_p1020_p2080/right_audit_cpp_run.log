@@ -1,0 +1,11 @@
+$ /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/build/vitis_sgbm_cpu /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/details/audit_flipped_right.png /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/details/audit_flipped_left.png /home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/details/d128_p1020_p2080/right_audit_flipped_disparity_raw.png 128 20 80 3
+Algorithm:       Vitis scalar SGM CPU reference
+Input size:      1280x800
+Disparities:     128
+Census window:   5x5
+P1/P2:           20/80
+Paths:           3
+Est. memory:     1507.8 MiB
+CPU compute:     1821.999 ms
+Raw output:      "/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/details/d128_p1020_p2080/right_audit_flipped_disparity_raw.png"
+Visualization:   "/home/hcc/Desktop/HXB/Vitis_Stereo_CPU_Ver/results/gemini335_1280x800_sgbm_fpga_equiv/details/d128_p1020_p2080/right_audit_flipped_disparity_raw_visual.png"

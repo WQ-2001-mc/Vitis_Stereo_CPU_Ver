@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Sweep the repository's Vitis scalar SGM reference and build a depth report.
 
-The program under test is ``src/vitis_sgbm_cpu.cpp``: 5x5 Census cost, four
-semi-global aggregation paths, integer-disparity winner-takes-all, and tunable
-D/P1/P2.  It is not OpenCV StereoSGBM.
+The program under test is ``src/vitis_sgbm_cpu.cpp``: 5x5 Census cost,
+two/three/four semi-global aggregation paths, integer-disparity
+winner-takes-all, and tunable D/P1/P2.  It is not OpenCV StereoSGBM.
 
 The default run evaluates the full Cartesian product of:
 
@@ -65,6 +65,7 @@ DEFAULT_DEPTH_MIN_MM = 300.0
 DEFAULT_DEPTH_MAX_MM = 3000.0
 DEFAULT_RUNS = 3
 DEFAULT_LR_TOLERANCE_PX = 1
+DEFAULT_PATHS = 4
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -168,6 +169,11 @@ def parse_args() -> argparse.Namespace:
         "--lr-tolerance-px",
         type=int,
         help="Maximum integer disparity disagreement for LR consistency",
+    )
+    parser.add_argument(
+        "--paths",
+        type=int,
+        help="Number of forward aggregation paths (2, 3, or 4)",
     )
     parser.add_argument("--focal-px", type=float)
     parser.add_argument("--baseline-mm", type=float)
@@ -278,6 +284,7 @@ def resolve_inputs(args: argparse.Namespace) -> argparse.Namespace:
         if args.lr_tolerance_px is not None
         else DEFAULT_LR_TOLERANCE_PX
     )
+    paths = args.paths if args.paths is not None else DEFAULT_PATHS
 
     if interactive:
         output = Path(prompt_text("输出目录", str(output))).expanduser()
@@ -292,6 +299,7 @@ def resolve_inputs(args: argparse.Namespace) -> argparse.Namespace:
         lr_tolerance = int(
             prompt_text("左右一致性容差/px", str(lr_tolerance))
         )
+        paths = int(prompt_text("前向聚合路径数", str(paths)))
 
     if left is None or right is None:
         raise ValueError(
@@ -313,6 +321,7 @@ def resolve_inputs(args: argparse.Namespace) -> argparse.Namespace:
     args.depth_max_mm = depth_max
     args.runs = runs
     args.lr_tolerance_px = lr_tolerance
+    args.paths = paths
     args.project_root = args.project_root.resolve()
     return args
 
@@ -335,6 +344,8 @@ def validate_inputs(args: argparse.Namespace) -> None:
         raise ValueError("--runs must be in [1, 20]")
     if not 0 <= args.lr_tolerance_px <= 10:
         raise ValueError("--lr-tolerance-px must be in [0, 10]")
+    if args.paths not in (2, 3, 4):
+        raise ValueError("--paths must be one of 2, 3, or 4")
     for disparity in (*args.disparity_values, args.penalty_disparity):
         if disparity <= 0 or disparity > 256:
             raise ValueError(f"D={disparity} must be in [1, 256]")
@@ -342,9 +353,9 @@ def validate_inputs(args: argparse.Namespace) -> None:
         (args.range_p1, args.range_p2),
         *args.penalty_pair_values,
     ):
-        if p1 < 0 or p2 <= p1:
+        if p1 < 0 or p2 <= p1 or p2 > 100:
             raise ValueError(
-                f"penalties must satisfy 0 <= P1 < P2, got {p1}/{p2}"
+                f"penalties must satisfy 0 <= P1 < P2 <= 100, got {p1}/{p2}"
             )
 
 
@@ -388,7 +399,7 @@ def ensure_cpp_binary(project_root: Path) -> tuple[Path, str]:
     if needs_build:
         for command in (
             ["cmake", "-S", str(project_root), "-B", str(project_root / "build")],
-            ["cmake", "--build", str(project_root / "build"), "-j"],
+            ["cmake", "--build", str(project_root / "build"), "--", "-j4"],
         ):
             completed = subprocess.run(
                 command, text=True, capture_output=True, check=False
@@ -435,6 +446,7 @@ def run_cpp_repeated(
     config: Configuration,
     runs: int,
     expected_shape: tuple[int, int],
+    paths: int,
 ) -> tuple[np.ndarray, list[float], float, float, str]:
     command = [
         str(binary),
@@ -444,6 +456,7 @@ def run_cpp_repeated(
         str(config.disparities),
         str(config.p1),
         str(config.p2),
+        str(paths),
     ]
     times = []
     reference: Optional[np.ndarray] = None
@@ -494,6 +507,7 @@ def run_cpp_once(
     raw_path: Path,
     config: Configuration,
     expected_shape: tuple[int, int],
+    paths: int,
 ) -> tuple[np.ndarray, float, str]:
     command = [
         str(binary),
@@ -503,6 +517,7 @@ def run_cpp_once(
         str(config.disparities),
         str(config.p1),
         str(config.p2),
+        str(paths),
     ]
     completed = subprocess.run(
         command, text=True, capture_output=True, check=False
@@ -1148,6 +1163,36 @@ def write_report(
             "按列比较时，各 P1/P2 的 LR 覆盖最佳 D 依次为 "
             + list_text(matrix_column_best_disparities)
         )
+    if len(args.disparity_values) == 1:
+        range_section_heading = (
+            f"## D={args.disparity_values[0]} 的当前 FPGA 固定范围结果"
+        )
+        range_raw_note = (
+            "原始图完整保留 C++ 核的整数视差输出，只把视差 0 画为黑色。"
+            "该参考实现会对几乎每个像素强制选出一个最小代价视差，因此彩色覆盖完整"
+            "不等于对应可靠；还需结合下图的外部 LR 一致性审计。"
+        )
+        range_lr_note = (
+            f"可信视图只保留左右视差差值≤{args.lr_tolerance_px} px、"
+            "且不在 0/D−1 边界的像素。它是脚本额外运行的审计层，不是原 Vitis "
+            f"核的输出。本轮 D={args.disparity_values[0]} 是当前 FPGA 工程的编译期固定值，"
+            "未将其他 D 值的趋势实验混入等效性结论。"
+        )
+    else:
+        range_section_heading = (
+            f"## D={best_range.disparities} 在当前场景形成最佳范围折中"
+        )
+        range_raw_note = (
+            "原始图完整保留 C++ 核的整数视差输出，只把视差 0 画为黑色。"
+            "该参考实现会对几乎每个像素强制选出一个最小代价视差，因此彩色覆盖完整"
+            "不等于对应可靠；视差上限饱和需要结合下图判断。"
+        )
+        range_lr_note = (
+            f"可信视图只保留左右视差差值≤{args.lr_tolerance_px} px、"
+            "且不在 0/D−1 边界的像素。它是脚本额外运行的审计层，不是原 Vitis "
+            f"核的输出。在本轮扫描值中，D={best_range.disparities} 的 LR 一致覆盖最高；"
+            "更大 D 还会增加搜索歧义、时间和软件工作集。"
+        )
 
     lines = [
         "# Gemini335 Vitis-SGBM/SGM：D 与 P1/P2 参数效果对比",
@@ -1156,7 +1201,7 @@ def write_report(
         "",
         (
             "本报告测试的是仓库 `src/vitis_sgbm_cpu.cpp`：Vitis `sgbm` "
-            "测试台的标量 SGM 参考路径，采用 5×5 Census、4 方向路径聚合和"
+            f"测试台的标量 SGM 参考路径，采用 5×5 Census、{args.paths} 方向路径聚合和"
             "整数视差 winner-takes-all；它不是 OpenCV `StereoSGBM`。"
         ),
         "",
@@ -1256,7 +1301,7 @@ def write_report(
                 "当前 Vitis 实现断言只支持 5 |"
             ),
             (
-                "| 聚合路径 | 固定 4 路径 | `NUM_DIR` 编译期参数，可取 2/3/4 |"
+                f"| 聚合路径 | 本轮固定 {args.paths} 路径 | `NUM_DIR` 编译期参数，可取 2/3/4 |"
             ),
             (
                 "| 视差并行度 | 标量 CPU 不模拟硬件并行 | `PARALLEL_UNITS` 编译期参数，"
@@ -1283,7 +1328,7 @@ def write_report(
                 "这些接口不能直接等同于本报告的 Vitis `SemiGlobalBM`。"
             ),
             "",
-            "## 15 组矩阵完整展示 D 与 P1/P2 的耦合",
+            f"## {len(matrix_configs)} 组矩阵完整展示 D 与 P1/P2 的耦合",
             "",
             "![D 与 P1/P2 完整参数矩阵](comparison_D_P1_P2_matrix.png)",
             "",
@@ -1326,28 +1371,19 @@ def write_report(
                 + "。这些排名用于筛选复测候选，不能单独作为深度精度排名。"
             ),
             "",
-            "## D=128 在当前场景形成最佳范围折中",
+            range_section_heading,
             "",
             "### 原始 SGM 输出",
             "",
             "![D 范围原始深度对比](comparison_D_range_raw.png)",
             "",
-            (
-                "原始图完整保留 C++ 核的整数视差输出，只把视差 0 画为黑色。"
-                "该参考实现会对几乎每个像素强制选出一个最小代价视差，因此彩色覆盖完整"
-                "不等于对应可靠；D=64 的红色近景饱和尤其需要结合下图判断。"
-            ),
+            range_raw_note,
             "",
             "### 左右一致性审计后的深度",
             "",
             "![D 范围 LR 一致深度对比](comparison_D_range_lr.png)",
             "",
-            (
-                f"可信视图只保留左右视差差值≤{args.lr_tolerance_px} px、"
-                "且不在 0/D−1 边界的像素。它是脚本额外运行的审计层，不是原 Vitis "
-                "核的输出。D=128 相比 D=64 消除了主要近距截断；D=256 增加搜索歧义、"
-                "时间和软件工作集，在这帧上没有提高 LR 一致覆盖。"
-            ),
+            range_lr_note,
             "",
             "![D 范围诊断指标](metrics_D_range.png)",
             "",
@@ -1509,7 +1545,7 @@ def write_report(
                 "的深度台阶；这只是量化间隔，不包含匹配和标定误差。"
             ),
             "- 原始核没有 uniqueness、置信度、speckle、LR check 或亚像素拟合；报告中的 LR 掩膜是外部审计。",
-            "- 4 路径标量 CPU 时间和三份完整代价体的软件工作集不能作为 FPGA 延时或 BRAM/LUT/FF/DSP 用量。",
+            f"- {args.paths} 路径标量 CPU 时间和三份完整代价体的软件工作集不能作为 FPGA 延时或 BRAM/LUT/FF/DSP 用量。",
             "- P1/P2 在本实现中是全图常数，没有按图像梯度自适应；强平滑可能跨越真实深度边界。",
             "",
             "## 建议的下一步",
@@ -1676,6 +1712,7 @@ def main() -> int:
                 config,
                 args.runs,
                 (height, width),
+                args.paths,
             )
             (config_dir / "left_cpp_runs.log").write_text(
                 cpp_log, encoding="utf-8"
@@ -1691,6 +1728,7 @@ def main() -> int:
                 right_flipped_raw_path,
                 config,
                 (height, width),
+                args.paths,
             )
             (config_dir / "right_audit_cpp_run.log").write_text(
                 right_log, encoding="utf-8"
@@ -1903,13 +1941,13 @@ def main() -> int:
                 "name": "Vitis scalar SGM CPU reference",
                 "source": "src/vitis_sgbm_cpu.cpp",
                 "census_window": "5x5",
-                "paths": 4,
+                "paths": args.paths,
                 "disparity_output": "uint8 integer pixels",
                 "not_opencv_stereosgbm": True,
                 "cpu_runtime_matching_parameters": ["D", "P1", "P2"],
                 "fixed_cpu_matching_configuration": {
                     "cost": "5x5 Census / Hamming distance",
-                    "aggregation_paths": 4,
+                    "aggregation_paths": args.paths,
                     "selection": "integer winner-takes-all",
                     "confidence_or_postprocessing": "none",
                 },
@@ -1942,6 +1980,7 @@ def main() -> int:
                 "left_runs": args.runs,
                 "right_audit_runs": 1,
                 "lr_tolerance_px": args.lr_tolerance_px,
+                "paths": args.paths,
                 "resume_used": args.resume,
             },
             "common_roi": {"x0": x0, "y0": y0, "x1": x1, "y1": y1},
